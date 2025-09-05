@@ -100,6 +100,11 @@ inline void sigmoid_back_inplace(float* dH, const float* H, int elems){
     for(int i=0;i<elems;i++){ float s=H[i]; dH[i]*=s*(1.f-s); }
 }
 
+inline void tanh_inplace(float* H, int elems){
+    #pragma omp parallel for
+    for(int i=0;i<elems;i++) H[i]=std::tanh(H[i]);
+}
+
 // Forward for one time-step, B examples.
 // xt: B tokens; Hprev[BxH]; Cprev[BxH]; outputs Hcur[BxH], Ccur[BxH], Z[BxV]
 inline void lstm_forward(const LSTM& M, const uint8_t* xt,
@@ -187,9 +192,9 @@ inline float softmax_ce_and_grad(float* Z, const uint8_t* yt, float* dZ,
 }
 
 // One-step backward + SGD update (TBPTT=1)
-inline void lstm_backward_update(LSTM& M, const uint8_t* xt,
-                                 const float* Hprev, const float* Cprev,
-                                 const float* Hcur, const float* Ccur,
+inline void lstm_backward_update(LSTM& M, [[maybe_unused]] const uint8_t* xt,
+                                 [[maybe_unused]] const float* Hprev, [[maybe_unused]] const float* Cprev,
+                                 const float* Hcur, [[maybe_unused]] const float* Ccur,
                                  const float* dZ, float lr, int B){
     const int H=HIDDEN, V=VOCAB_SIZE;
     // grads (stack-allocated scratch; zeroed each call)
@@ -269,62 +274,6 @@ inline void lstm_backward_update(LSTM& M, const uint8_t* xt,
     // Note: The rest of the weight updates for gates are omitted here for brevity.
 }
 
-// LSTM Forward for one time-step, B examples.
-// xt: B tokens; Hprev[BxH], Cprev[BxH]; outputs Hcur[BxH], Ccur[BxH], Z[BxV]
-inline void lstm_forward(const LSTM& M, const uint8_t* xt,
-                         const float* Hprev, const float* Cprev,
-                         float* Hcur, float* Ccur, float* Z, int B) {
-    const int H = HIDDEN, V = VOCAB_SIZE;
 
-    // Temporary buffers for gates
-    std::vector<float> i(B*H), f(B*H), o(B*H), g(B*H);
-
-    // For each batch element
-    for (int b = 0; b < B; ++b) {
-        uint8_t tok = xt[b];
-        // Input embedding (reuse Wxi row)
-        const float* exi = &M.Wxi[tok * H];
-        const float* exf = &M.Wxf[tok * H];
-        const float* exo = &M.Wxo[tok * H];
-        const float* exg = &M.Wxg[tok * H];
-
-        for (int h = 0; h < H; ++h) {
-            // i = sigmoid(Wxi[tok] + Whi * Hprev + bi)
-            float ii = exi[h] + M.bi[h];
-            for (int hh = 0; hh < H; ++hh) ii += M.Whi[h * H + hh] * Hprev[b * H + hh];
-            i[b * H + h] = 1.0f / (1.0f + expf(-ii));
-
-            // f = sigmoid(Wxf[tok] + Whf * Hprev + bf)
-            float ff = exf[h] + M.bf[h];
-            for (int hh = 0; hh < H; ++hh) ff += M.Whf[h * H + hh] * Hprev[b * H + hh];
-            f[b * H + h] = 1.0f / (1.0f + expf(-ff));
-
-            // o = sigmoid(Wxo[tok] + Who * Hprev + bo)
-            float oo = exo[h] + M.bo[h];
-            for (int hh = 0; hh < H; ++hh) oo += M.Who[h * H + hh] * Hprev[b * H + hh];
-            o[b * H + h] = 1.0f / (1.0f + expf(-oo));
-
-            // g = tanh(Wxg[tok] + Whg * Hprev + bg)
-            float gg = exg[h] + M.bg[h];
-            for (int hh = 0; hh < H; ++hh) gg += M.Whg[h * H + hh] * Hprev[b * H + hh];
-            g[b * H + h] = tanhf(gg);
-        }
-    }
-
-    // Ccur = f * Cprev + i * g
-    for (int i = 0; i < B*H; ++i) {
-        Ccur[i] = f[i] * Cprev[i] + i[i] * g[i];
-    }
-
-    // Hcur = o * tanh(Ccur)
-    for (int i = 0; i < B*H; ++i) {
-        Hcur[i] = o[i] * tanhf(Ccur[i]);
-    }
-
-    // Z = Hcur * Why + by
-    std::memset(Z, 0, (size_t)B * V * sizeof(float));
-    gemm_rowmajor_acc(B, H, V, Hcur, M.Why, Z);
-    add_bias_rowwise(Z, M.by, B, V);
-}
 
 

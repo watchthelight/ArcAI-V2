@@ -7,6 +7,15 @@
 #include "arc_types.h"
 #include "arc_kernels.h"
 
+#ifndef ARC_BPTT_H
+#define ARC_BPTT_H
+
+#include <cstdlib>
+#include <cstring>
+#include <cstdio>
+#include "arc_types.h"
+#include "arc_kernels.h"
+
 // Train one batch (BATCH x SEQ_LEN) with TBPTT=TBPTT_LEN; returns avg CE loss for the sequence
 inline float lstm_train_batch(LSTM& M, const uint8_t* batch /*size: BATCH*SEQ_LEN*/) {
     const int B = BATCH, T = SEQ_LEN, H = HIDDEN, V = VOCAB_SIZE, TBPTT = TBPTT_LEN;
@@ -30,8 +39,8 @@ inline float lstm_train_batch(LSTM& M, const uint8_t* batch /*size: BATCH*SEQ_LE
         lstm_forward(M, xt, Hprev, Cprev, Hcur, Ccur, Z, B);
         float loss = softmax_ce_and_grad(Z, yt, dZ, B, V);
         loss_sum += loss;
-        // For simplicity, use rnn_backward_update as placeholder; full LSTM backward needed
-        rnn_backward_update(M, xt, Hprev, Hcur, dZ, LR, B);
+        // For simplicity, use lstm_backward_update as placeholder; full LSTM backward needed
+        lstm_backward_update(M, xt, Hprev, Cprev, Hcur, Ccur, dZ, LR, B);
 
         // roll
         std::memcpy(Hprev, Hcur, (size_t)B*H*sizeof(float));
