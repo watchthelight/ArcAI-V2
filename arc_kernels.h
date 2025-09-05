@@ -116,30 +116,36 @@ inline void lstm_forward(const LSTM& M, const uint8_t* xt,
     // gates: i,f,o,g
     std::vector<float> i(B*H), f(B*H), o(B*H), g(B*H);
 
+    // Convert tokens to one-hot embeddings
+    std::vector<float> x_embed(B*V, 0.f);
+    for(int b=0;b<B;b++){
+        x_embed[(size_t)b*V + xt[b]] = 1.f;
+    }
+
     // i = sigmoid(Wxi * xt + Whi * Hprev + bi)
     std::memset(i.data(), 0, (size_t)B*H*sizeof(float));
-    gemm_rowmajor_acc(B, V, H, (const float*)xt, M.Wxi, i.data());
+    gemm_rowmajor_acc(B, V, H, x_embed.data(), M.Wxi, i.data());
     gemm_rowmajor_acc(B, H, H, Hprev, M.Whi, i.data());
     add_bias_rowwise(i.data(), M.bi, B, H);
     sigmoid_inplace(i.data(), B*H);
 
     // f = sigmoid(Wxf * xt + Whf * Hprev + bf)
     std::memset(f.data(), 0, (size_t)B*H*sizeof(float));
-    gemm_rowmajor_acc(B, V, H, (const float*)xt, M.Wxf, f.data());
+    gemm_rowmajor_acc(B, V, H, x_embed.data(), M.Wxf, f.data());
     gemm_rowmajor_acc(B, H, H, Hprev, M.Whf, f.data());
     add_bias_rowwise(f.data(), M.bf, B, H);
     sigmoid_inplace(f.data(), B*H);
 
     // o = sigmoid(Wxo * xt + Who * Hprev + bo)
     std::memset(o.data(), 0, (size_t)B*H*sizeof(float));
-    gemm_rowmajor_acc(B, V, H, (const float*)xt, M.Wxo, o.data());
+    gemm_rowmajor_acc(B, V, H, x_embed.data(), M.Wxo, o.data());
     gemm_rowmajor_acc(B, H, H, Hprev, M.Who, o.data());
     add_bias_rowwise(o.data(), M.bo, B, H);
     sigmoid_inplace(o.data(), B*H);
 
     // g = tanh(Wxg * xt + Whg * Hprev + bg)
     std::memset(g.data(), 0, (size_t)B*H*sizeof(float));
-    gemm_rowmajor_acc(B, V, H, (const float*)xt, M.Wxg, g.data());
+    gemm_rowmajor_acc(B, V, H, x_embed.data(), M.Wxg, g.data());
     gemm_rowmajor_acc(B, H, H, Hprev, M.Whg, g.data());
     add_bias_rowwise(g.data(), M.bg, B, H);
     tanh_inplace(g.data(), B*H);
