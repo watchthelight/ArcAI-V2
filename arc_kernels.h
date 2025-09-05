@@ -280,6 +280,8 @@ inline void lstm_backward_update(LSTM& M, [[maybe_unused]] const uint8_t* xt,
     // Note: The rest of the weight updates for gates are omitted here for brevity.
 }
 
+#endif // ARC_KERNELS_H
+
 
 
 
