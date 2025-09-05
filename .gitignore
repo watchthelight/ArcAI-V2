@@ -1,0 +1,25 @@
+# Build directories
+build/
+cmake-build-*/
+
+# Checkpoints and models
+checkpoint_*.bin
+checkpoint_latest.bin
+
+# Dataset files
+*.bin
+!dataset.bin
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.log
