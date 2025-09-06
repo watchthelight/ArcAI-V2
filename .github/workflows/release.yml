@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - 'v*'
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -12,13 +13,23 @@ jobs:
   build:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout main
+        uses: actions/checkout@v3
+        with:
+          ref: main
+      - name: Merge master if needed
+        shell: cmd
+        run: |
+          git fetch origin master
+          git log HEAD..origin/master --oneline >nul 2>nul && git merge origin/master
       - name: Configure CMake
+        shell: cmd
         run: |
           mkdir build
           cd build
           cmake .. -G "Visual Studio 17 2022" -A x64 -DENABLE_GUI=ON
       - name: Build binaries
+        shell: cmd
         run: |
           cd build
           cmake --build . --config Release
@@ -28,16 +39,23 @@ jobs:
           cd build\bin
           if not exist lightwatch_gui.exe exit 1
           if not exist lightwatch_cli.exe exit 1
+          if not exist lightwatch_run.exe exit 1
+          if not exist lightwatch_train.exe exit 1
           if not exist dummy_checkpoint.bin fsutil file createnew dummy_checkpoint.bin 3412992
-          lightwatch_cli.exe dummy_checkpoint.bin --len 1 || exit /b 0
+          lightwatch_cli.exe dummy_checkpoint.bin --len 1
+      - name: Delete existing release
+        shell: cmd
+        run: |
+          curl -X DELETE -H "Authorization: token %GITHUB_TOKEN%" https://api.github.com/repos/%GITHUB_REPOSITORY%/releases/tags/%GITHUB_REF_NAME%
+        continue-on-error: true
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
           draft: false
           prerelease: false
-          name: LightwatchAI v${{ github.ref_name }}
+          name: ${{ github.ref_name }}
           tag_name: ${{ github.ref_name }}
-          body: Automated release of LightwatchAI GUI for Windows.
+          body: Automated release of LightwatchAI binaries for Windows.
           files: |
             build/bin/lightwatch_gui.exe
             build/bin/lightwatch_cli.exe
