@@ -1,80 +1,42 @@
-name: Release Windows GUI
+name: LightwatchAI Build & Release
 
 on:
   push:
-    branches: [ main ]
-  workflow_dispatch:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
 
 jobs:
-  build-and-release:
+  build:
     runs-on: windows-latest
-
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
-
-    - name: Install Qt
-      uses: jurplel/install-qt-action@v3
-      with:
-        version: '5.15.2'
-        host: 'windows'
-        target: 'desktop'
-        arch: 'win64_msvc2019_64'
-        install-deps: 'true'
-
-    - name: Configure CMake
-      run: |
-        mkdir build
-        cd build
-        cmake .. -G "Visual Studio 17 2022" -A x64 -DENABLE_GUI=ON
-
-    - name: Build
-      run: |
-        cd build
-        cmake --build . --config Release
-
-    - name: Verify GUI Target Exists
-      run: |
-        if (!(Test-Path build/bin/lightwatch_gui.exe)) {
-          Write-Error "lightwatch_gui.exe not found. GUI target may not have been built."
-          exit 1
-        }
-
-    - name: Bundle Qt Dependencies
-      run: |
-        windeployqt build/bin/lightwatch_gui.exe
-
-    - name: Verify build artifacts
-      run: |
-        cd build/bin
-        if (!(Test-Path lightwatch_gui.exe)) { exit 1 }
-        if (!(Test-Path lightwatch_cli.exe)) { exit 1 }
-        ./lightwatch_cli.exe || true
-
-    - name: Package
-      run: |
-        cd build/bin
-        7z a ../../LightwatchAI.zip lightwatch_gui.exe *
-
-    - name: Create Release
-      uses: actions/create-release@v1
-      id: create_release
-      with:
-        draft: false
-        prerelease: false
-        release_name: LightwatchAI v${{ github.run_number }}
-        tag_name: v${{ github.run_number }}
-        body: |
-          Automated release of LightwatchAI GUI for Windows.
-      env:
-        GITHUB_TOKEN: ${{ github.token }}
-
-    - name: Upload Release Asset
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ github.token }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./LightwatchAI.zip
-        asset_name: LightwatchAI.zip
-        asset_content_type: application/zip
+      - uses: actions/checkout@v3
+      - name: Configure CMake
+        run: |
+          mkdir build
+          cd build
+          cmake .. -G "Visual Studio 17 2022" -A x64 -DENABLE_GUI=ON
+      - name: Build binaries
+        run: |
+          cd build
+          cmake --build . --config Release
+      - name: Validate executables
+        shell: pwsh
+        run: |
+          cd build/bin
+          if (!(Test-Path lightwatch_gui.exe)) { exit 1 }
+          if (!(Test-Path lightwatch_cli.exe)) { exit 1 }
+          New-Item -ItemType File -Path dummy_checkpoint.bin
+          ./lightwatch_cli.exe dummy_checkpoint.bin --len 1
+      - name: Create Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.RELEASE_PAT }}
+        with:
+          draft: false
+          prerelease: false
+          release_name: LightwatchAI v${{ github.ref_name }}
+          tag_name: ${{ github.ref_name }}
+          body: Automated release of LightwatchAI GUI for Windows.
