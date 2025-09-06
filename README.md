@@ -5,6 +5,7 @@ A high-performance, custom implementation of a character-level Recurrent Neural 
 ## Features
 
 - **LSTM Architecture**: Long Short-Term Memory networks for better long-term dependency modeling
+- **Interactive Model Configuration**: Terminal-based menu system for selecting model parameters
 - **Multi-GPU Support**: 
   - **NVIDIA CUDA**: Optimized for NVIDIA GPUs using CUDA and cuBLAS
   - **AMD HIP**: Optimized for AMD GPUs using ROCm/HIP
@@ -15,13 +16,36 @@ A high-performance, custom implementation of a character-level Recurrent Neural 
 - **OpenMP Parallelization**: CPU fallback with multi-threading support
 - **BLAS Integration**: Optional OpenBLAS for accelerated matrix operations
 
+## Interactive Configuration
+
+LightwatchAI now features an interactive configuration system that allows you to select model parameters before training or running:
+
+### Model Size Options
+- **Minimum** → 64 hidden units
+- **Mini** → 96 hidden units  
+- **NotSoMini** → 128 hidden units (default)
+- **Normaal** → 160 hidden units
+- **Normalish** → 192 hidden units
+- **Big** → 224 hidden units
+- **Bigger** → 256 hidden units
+- **Biggest** → 320 hidden units
+- **LiterallyInsane** → 512 hidden units
+
+### TBPTT Length Options
+- **Shortest** → 1 step
+- **Short** → 8 steps
+- **NotShortButNotLong** → 16 steps
+- **YesLong** → 32 steps (default)
+- **Longer** → 64 steps
+- **Longest** → 128 steps
+
 ## Architecture
 
-- **Model Type**: LSTM with configurable hidden size (default: 256)
+- **Model Type**: LSTM with interactive configurable hidden size
 - **Vocabulary**: 256 tokens (0-255 byte values)
 - **Batch Size**: 16 sequences
 - **Sequence Length**: 64 timesteps
-- **TBPTT Length**: 32 steps
+- **TBPTT Length**: Interactive configurable (1-128 steps)
 - **Learning Rate**: 0.001 (Adam)
 
 ## Requirements
@@ -74,25 +98,64 @@ A high-performance, custom implementation of a character-level Recurrent Neural 
 
 ## Usage
 
-### Training
+### Interactive Training (New!)
 
-Prepare your dataset as a binary file of uint8_t tokens, then train:
+Use the new interactive configuration system:
 
 ```bash
-./arc_train dataset.bin
+./lightwatch_train dataset.bin
 ```
+
+This will launch an interactive menu where you can:
+1. Select model size using arrow keys (↑/↓)
+2. Select TBPTT length using arrow keys (↑/↓)
+3. Press Enter to confirm selections
 
 The model will train for 10,000 steps, saving checkpoints every 10 steps.
 
-### Generation
+### Interactive Generation (New!)
 
-Generate text using a trained checkpoint:
+Generate text with interactive configuration:
 
 ```bash
+./lightwatch_run checkpoint_latest.bin --len 1000 --temp 0.8 --seed "Hello world"
+```
+
+### Command Line Override
+
+You can override the interactive configuration with command line flags:
+
+```bash
+# Training with specific parameters
+./lightwatch_train dataset.bin --hidden-size 256 --tbptt 64
+
+# Generation with specific parameters  
+./lightwatch_run checkpoint_latest.bin --hidden-size 256 --tbptt 64 --len 1000 --temp 0.8
+```
+
+### Legacy Usage
+
+The original executables are still available for backward compatibility:
+
+```bash
+# Legacy training (uses compile-time constants)
+./arc_train dataset.bin
+
+# Legacy generation
 ./arc_run checkpoint_latest.bin --len 1000 --temp 0.8 --seed "Hello world"
 ```
 
-Options:
+### Configuration Options
+
+**Interactive Configuration:**
+- Use arrow keys (↑/↓) to navigate menu options
+- Press Enter to select
+- Press 'q' to quit
+- Automatically falls back to defaults in non-interactive environments
+
+**Command Line Flags:**
+- `--hidden-size N`: Set hidden layer size (64-512)
+- `--tbptt N`: Set TBPTT length (1-128)
 - `--len N`: Generate N characters
 - `--temp T`: Sampling temperature (0.1-2.0)
 - `--topk K`: Top-K sampling (0 = no limit)
@@ -100,13 +163,24 @@ Options:
 
 ## Project Structure
 
-- `arc_types.h`: Model definitions and constants
-- `arc_kernels.h`: Core computation kernels (forward/backward)
-- `arc_bptt.h`: Backpropagation through time implementation
-- `arc_train.cpp`: Training executable
-- `arc_run.cpp`: Inference/generation executable
-- `arc_dataset.h`: Data loading utilities
-- `arc_generate.h`: Sampling utilities
+### New LightwatchAI Files
+- `lightwatch_types.h/cpp`: Runtime configurable model definitions
+- `lightwatch_kernels.h`: Core computation kernels (forward/backward)
+- `lightwatch_bptt.h`: Backpropagation through time implementation
+- `lightwatch_config.h/cpp`: Interactive configuration system
+- `lightwatch_train.cpp`: New training executable with interactive config
+- `lightwatch_run.cpp`: New inference executable with interactive config
+- `lightwatch_dataset.h`: Data loading utilities
+- `lightwatch_generate.h`: Sampling utilities
+
+### Legacy Files (Backward Compatibility)
+- `arc_types.h`: Original model definitions and constants
+- `arc_kernels.h`: Original computation kernels
+- `arc_bptt.h`: Original BPTT implementation
+- `arc_train.cpp`: Original training executable
+- `arc_run.cpp`: Original inference executable
+- `arc_dataset.h`: Original data loading utilities
+- `arc_generate.h`: Original sampling utilities
 
 ## Performance Improvements
 
