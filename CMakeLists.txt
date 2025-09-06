@@ -172,6 +172,17 @@ if(QT_FOUND)
         COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:lightwatch_gui> ${BIN_DIR}/
         COMMENT "Copying lightwatch_gui to bin directory"
     )
+
+    # Bundle Qt dependencies for Windows standalone executable
+    if(WIN32)
+        find_program(WINDEPLOYQT_EXECUTABLE windeployqt HINTS ${QT_BIN_DIR})
+        if(WINDEPLOYQT_EXECUTABLE)
+            add_custom_command(TARGET lightwatch_gui POST_BUILD
+                COMMAND ${WINDEPLOYQT_EXECUTABLE} $<TARGET_FILE:lightwatch_gui>
+                COMMENT "Bundling Qt runtime libraries"
+            )
+        endif()
+    endif()
 endif()
 
 # Post-build commands to copy executables to bin/ directory

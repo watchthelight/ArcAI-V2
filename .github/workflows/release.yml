@@ -26,37 +26,38 @@ jobs:
       run: |
         mkdir build
         cd build
-        cmake .. -G "Visual Studio 16 2019" -A x64 -DENABLE_GUI=ON
+        cmake .. -G "Visual Studio 17 2022" -A x64 -DENABLE_GUI=ON
 
     - name: Build
       run: |
         cd build
         cmake --build . --config Release
 
+    - name: Bundle Qt Dependencies
+      run: |
+        windeployqt build/bin/lightwatch_gui.exe
+
+    - name: Test Binaries
+      run: |
+        cd build/bin
+        ./lightwatch_train.exe --help
+        ./lightwatch_run.exe --help
+        ./data_preprocess.exe --help
+        ./simple_cuda_test.exe
+        if exist lightwatch_gui.exe (echo GUI exe exists) else (exit 1)
+
     - name: Package
       run: |
-        cd bin
-        7z a ../lightwatch_gui.zip lightwatch_gui.exe
+        cd build/bin
+        7z a ../../lightwatch_gui.zip *
 
     - name: Create Release
-      uses: actions/create-release@v1
-      id: create_release
+      uses: softprops/action-gh-release@v2
       with:
-        draft: false
-        prerelease: false
-        release_name: LightwatchAI GUI v${{ github.run_number }}
-        tag_name: v${{ github.run_number }}
+        tag_name: latest
+        files: lightwatch_gui.zip
         body: |
           Automated release of LightwatchAI GUI for Windows.
+        prerelease: false
       env:
         GITHUB_TOKEN: ${{ github.token }}
-
-    - name: Upload Release Asset
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ github.token }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./lightwatch_gui.zip
-        asset_name: lightwatch_gui.zip
-        asset_content_type: application/zip

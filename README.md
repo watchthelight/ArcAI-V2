@@ -483,6 +483,14 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 Pre-built Windows GUI executables are available in the [Releases](https://github.com/watchthelight/LightwatchAI/releases) section. Download the latest `.exe` file to run the GUI without building from source.
 
+## Download
+
+Download the latest Windows GUI executable from the [Releases](https://github.com/watchthelight/LightwatchAI/releases/latest) page.
+
+![GUI Screenshot](screenshots/gui_main.png)
+
+*GUI screenshots to be added.*
+
 ## Acknowledgments
 
 - Inspired by Andrej Karpathy's char-rnn
