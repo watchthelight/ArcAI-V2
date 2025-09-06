@@ -26,7 +26,6 @@ jobs:
           target: 'desktop'
           arch: 'win64_msvc2019_64'
           dir: '${{ github.workspace }}/qt/'
-          modules: 'qtbase'
 
       - name: Configure CMake
         shell: cmd
