@@ -1,4 +1,4 @@
-# watchthelight-AI
+# LightwatchAI
 
 A high-performance, custom implementation of a character-level Recurrent Neural Network (RNN) language model, optimized for both AMD and NVIDIA GPUs. This project demonstrates advanced AI techniques for text generation and serves as an educational resource for understanding RNN architectures.
 
@@ -36,8 +36,8 @@ A high-performance, custom implementation of a character-level Recurrent Neural 
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/watchthelight/watchthelight-AI.git
-   cd watchthelight-AI
+   git clone https://github.com/watchthelight/LightwatchAI.git
+   cd LightwatchAI
    ```
 
 2. Build with CMake:
