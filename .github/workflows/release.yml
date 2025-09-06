@@ -49,7 +49,7 @@ jobs:
         cd build/bin
         if (!(Test-Path lightwatch_gui.exe)) { exit 1 }
         if (!(Test-Path lightwatch_cli.exe)) { exit 1 }
-        ./lightwatch_cli.exe --help
+        ./lightwatch_cli.exe
 
     - name: Package
       run: |
