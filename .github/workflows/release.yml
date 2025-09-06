@@ -22,7 +22,7 @@ jobs:
         shell: cmd
         run: |
           git fetch origin master
-          git log HEAD..origin/master --oneline >nul 2>nul && git merge origin/master
+          git log HEAD..origin/master --oneline >nul 2>nul && git merge origin/master --allow-unrelated-histories
       - name: Configure CMake
         shell: cmd
         run: |
