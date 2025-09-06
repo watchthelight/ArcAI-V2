@@ -9,7 +9,8 @@
 
 // Train one batch (BATCH x SEQ_LEN) with TBPTT=TBPTT_LEN; returns avg CE loss for the sequence
 inline float lstm_train_batch(LSTM& M, const uint8_t* batch /*size: BATCH*SEQ_LEN*/) {
-    const int B = BATCH, T = SEQ_LEN, H = HIDDEN, V = VOCAB_SIZE, TBPTT = TBPTT_LEN;
+    const int B = BATCH, T = SEQ_LEN, H = HIDDEN, V = VOCAB_SIZE;
+    // TBPTT = TBPTT_LEN; // Not used in current implementation
 
     // temps
     float* Hprev = (float*)lightwatch_aligned_malloc((size_t)B*H*sizeof(float));
