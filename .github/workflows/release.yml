@@ -41,10 +41,3 @@ jobs:
           release_name: LightwatchAI v${{ github.ref_name }}
           tag_name: ${{ github.ref_name }}
           body: Automated release of LightwatchAI GUI for Windows.
-      - name: Trigger release workflow
-        uses: peter-evans/workflow-dispatch@v1
-        with:
-          token: ${{ secrets.RELEASE_PAT }}
-          repository: your-org/LightwatchAI
-          workflow: release.yml
-          ref: main
