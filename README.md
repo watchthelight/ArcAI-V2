@@ -414,3 +414,4 @@ MIT License - see [LICENSE](LICENSE) file for details.
 - Inspired by Andrej Karpathy's char-rnn
 - Built with modern C++17 and cross-platform compatibility in mind
 - Community contributions for platform-specific optimizations
+- SERVAL SERVAL SERVAL SERVAL
