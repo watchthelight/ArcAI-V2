@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\Bash\ArcAI-V2\build_cuda_test\CMakeFiles\5eb91f913894438a18bccf09c2359ffa\generate.stamp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{CA58B771-D6DB-3605-9E67-7D330E7341E3}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

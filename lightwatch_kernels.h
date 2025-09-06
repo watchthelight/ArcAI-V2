@@ -273,9 +273,9 @@ inline void lstm_backward_update(LSTM& M, [[maybe_unused]] const uint8_t* xt,
     // SGD update (scale by 1/B for stability)
     const float scale = lr / (float)B;
     #pragma omp parallel for
-    for(size_t i=0;i<(size_t)H*V;i++) M.Why[i] -= scale * dWhy[i];
+    for(int i=0;i<H*V;i++) M.Why[i] -= scale * dWhy[i];
     #pragma omp parallel for
-    for(size_t i=0;i<(size_t)V;i++) M.by[i]  -= scale * dby[i];
+    for(int i=0;i<V;i++) M.by[i]  -= scale * dby[i];
 
     // Note: The rest of the weight updates for gates are omitted here for brevity.
 }

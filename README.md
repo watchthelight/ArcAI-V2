@@ -42,6 +42,7 @@ A high-performance, custom implementation of a character-level LSTM language mod
 - **Optional**: CUDA Toolkit 12.0+ (NVIDIA GPU support)
 - **Optional**: ROCm/HIP (AMD GPU support)
 - **Optional**: OpenBLAS (CPU acceleration)
+- **Optional**: Qt 5.15+ or Qt 6.x (GUI support)
 
 ## Platform-Specific Setup
 
@@ -218,12 +219,78 @@ cd ..
 # Interactive training
 ./lightwatch_train dataset.bin
 
-# Interactive generation  
+# Interactive generation
 ./lightwatch_run checkpoint_latest.bin
 
 # Command line override
 ./lightwatch_train dataset.bin --hidden-size 256 --tbptt 64
 ```
+
+## Qt Installation for GUI
+
+### Windows
+1. Download Qt Online Installer from https://www.qt.io/download
+2. Run the installer and select Qt 5.15+ or Qt 6.x
+3. Install Qt Creator (optional) and the MinGW or MSVC components
+4. Ensure Qt bin directory is in PATH
+
+### Linux (Ubuntu/Debian)
+```bash
+# Install Qt5
+sudo apt install qt5-default qtbase5-dev qtchooser
+
+# Or install Qt6
+sudo apt install qt6-base-dev
+```
+
+### macOS
+```bash
+# Install Qt5 via Homebrew
+brew install qt5
+
+# Or download Qt6 from qt.io
+```
+
+## GUI Build Instructions
+
+### Windows
+```powershell
+# GUI build with Qt
+mkdir build_gui
+cd build_gui
+cmake .. -G "Visual Studio 17 2022" -A x64 -DENABLE_GUI=ON
+cmake --build . --config Release
+```
+
+### Linux
+```bash
+# GUI build
+mkdir build_gui && cd build_gui
+cmake .. -DENABLE_GUI=ON
+make -j$(nproc)
+```
+
+### macOS
+```bash
+# GUI build
+mkdir build_gui && cd build_gui
+cmake .. -DENABLE_GUI=ON
+make -j$(sysctl -n hw.ncpu)
+```
+
+## GUI Usage
+
+The GUI provides an easy-to-use interface for training and generation:
+
+1. **Select Training Data**: Click "Select Training Data" to choose a .txt file. It will be automatically preprocessed.
+2. **Train**: Click "Train" to start training on the selected data.
+3. **Generate**: Click "Generate" to open a dialog for generation parameters and run text generation.
+
+The right panel shows live output from the training/generation processes.
+
+![GUI Screenshot](screenshots/gui_main.png)
+
+*Note: Screenshots will be added after GUI implementation.*
 
 ## Usage Guide
 
@@ -375,6 +442,7 @@ LightwatchAI/
 ├── bin/                        # Built executables (after build)
 │   ├── lightwatch_train(.exe)  # Training executable
 │   ├── lightwatch_run(.exe)    # Generation executable
+│   ├── lightwatch_gui(.exe)    # GUI executable (if Qt available)
 │   ├── data_preprocess(.exe)   # Data preprocessing utility
 │   └── simple_cuda_test(.exe)  # CUDA functionality test
 ├── data_preprocess.cpp/h       # Data preprocessing utilities
@@ -382,6 +450,8 @@ LightwatchAI/
 ├── lightwatch_types.cpp/h      # Runtime configurable parameters
 ├── lightwatch_train.cpp        # Training executable source
 ├── lightwatch_run.cpp          # Generation executable source
+├── lightwatch_gui.cpp          # GUI main application
+├── gui_mainwindow.h/.cpp       # GUI main window implementation
 ├── lightwatch_kernels.h        # LSTM computation kernels
 ├── lightwatch_bptt.h           # Backpropagation implementation
 ├── lightwatch_dataset.h        # Data loading utilities
@@ -408,6 +478,10 @@ Contributions welcome! Please:
 ## License
 
 MIT License - see [LICENSE](LICENSE) file for details.
+
+## Releases
+
+Pre-built Windows GUI executables are available in the [Releases](https://github.com/watchthelight/LightwatchAI/releases) section. Download the latest `.exe` file to run the GUI without building from source.
 
 ## Acknowledgments
 

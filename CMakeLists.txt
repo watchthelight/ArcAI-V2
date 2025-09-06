@@ -12,6 +12,7 @@ file(MAKE_DIRECTORY ${BIN_DIR})
 option(USE_HIP "Enable HIP for AMD GPU support" OFF)
 option(USE_CUDA "Enable CUDA for NVIDIA GPU support" OFF)
 option(USE_OPENBLAS "Use OpenBLAS for matrix operations" OFF)
+option(ENABLE_GUI "Enable GUI build with Qt" ON)
 
 # Find packages
 if(USE_HIP)
@@ -32,6 +33,25 @@ endif()
 find_package(PkgConfig QUIET)
 if(PkgConfig_FOUND)
     pkg_check_modules(NCURSES ncurses)
+endif()
+
+# Find Qt for GUI (optional)
+if(ENABLE_GUI)
+    find_package(Qt6 QUIET COMPONENTS Widgets)
+    if(NOT Qt6_FOUND)
+        find_package(Qt5 QUIET COMPONENTS Widgets)
+        if(Qt5_FOUND)
+            set(QT_VERSION 5)
+        endif()
+    else()
+        set(QT_VERSION 6)
+    endif()
+    if(Qt6_FOUND OR Qt5_FOUND)
+        set(QT_FOUND TRUE)
+        set(CMAKE_AUTOMOC ON)
+        set(CMAKE_AUTORCC ON)
+        set(CMAKE_AUTOUIC ON)
+    endif()
 endif()
 
 # Source files
@@ -133,6 +153,27 @@ if(USE_CUDA)
     target_compile_definitions(simple_cuda_test PRIVATE USE_CUDA)
 endif()
 
+# GUI executable
+if(QT_FOUND)
+    add_executable(lightwatch_gui lightwatch_gui.cpp gui_mainwindow.cpp gui_mainwindow.h ${LIGHTWATCH_SOURCES} ${LIGHTWATCH_HEADERS})
+    target_link_libraries(lightwatch_gui Qt${QT_VERSION}::Widgets)
+
+    # Apply same compiler flags as other executables
+    if(MSVC)
+        target_compile_options(lightwatch_gui PRIVATE /W4 /O2 /openmp)
+        target_compile_options(lightwatch_gui PRIVATE $<$<CONFIG:Release>:/RTC- >)
+        target_compile_definitions(lightwatch_gui PRIVATE _CRT_SECURE_NO_WARNINGS)
+    else()
+        target_compile_options(lightwatch_gui PRIVATE -Wall -Wextra -O3 ${OPENMP_FLAGS})
+    endif()
+
+    # Post-build command
+    add_custom_command(TARGET lightwatch_gui POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:lightwatch_gui> ${BIN_DIR}/
+        COMMENT "Copying lightwatch_gui to bin directory"
+    )
+endif()
+
 # Post-build commands to copy executables to bin/ directory
 add_custom_command(TARGET lightwatch_train POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:lightwatch_train> ${BIN_DIR}/
@@ -155,6 +196,10 @@ add_custom_command(TARGET simple_cuda_test POST_BUILD
 )
 
 # Install
-install(TARGETS lightwatch_train lightwatch_run data_preprocess simple_cuda_test
+set(INSTALL_TARGETS lightwatch_train lightwatch_run data_preprocess simple_cuda_test)
+if(QT_FOUND)
+    list(APPEND INSTALL_TARGETS lightwatch_gui)
+endif()
+install(TARGETS ${INSTALL_TARGETS}
     RUNTIME DESTINATION bin
 )

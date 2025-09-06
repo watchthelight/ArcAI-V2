@@ -11,6 +11,7 @@
 #include "lightwatch_dataset.h"
 #include "lightwatch_bptt.h"
 #include "lightwatch_config.h"
+#include "data_preprocess.h"
 
 // Adam optimizer parameters
 const float BETA1 = 0.9f;
@@ -76,26 +77,59 @@ int main(int argc, char** argv) {
     // Initialize runtime parameters
     initializeLightwatchConfig(config.hidden_size, config.tbptt_len);
 
-    // Parse remaining arguments (skip config flags)
-    std::vector<std::string> remaining_args;
+    // Parse command line arguments
+    std::string data_file = "data.txt";
+    std::string dataset_path = "dataset.bin";
+    bool force_regen = false;
+
     for (int i = 1; i < argc; ++i) {
-        if (std::strcmp(argv[i], "--hidden-size") == 0) {
-            ++i; // skip value
+        if (std::strcmp(argv[i], "--data") == 0 && i + 1 < argc) {
+            data_file = argv[++i];
+        } else if (std::strcmp(argv[i], "--regen") == 0) {
+            force_regen = true;
+        } else if (std::strcmp(argv[i], "--hidden-size") == 0) {
+            ++i; // skip value (already handled by config)
         } else if (std::strcmp(argv[i], "--tbptt") == 0) {
-            ++i; // skip value
+            ++i; // skip value (already handled by config)
+        } else if (argv[i][0] == '-') {
+            // Unknown flag
+            std::fprintf(stderr, "Unknown option: %s\n", argv[i]);
+            std::fprintf(stderr, "usage: %s [--data file.txt] [--regen] [--hidden-size N] [--tbptt N]\n", argv[0]);
+            return 1;
         } else {
-            remaining_args.push_back(argv[i]);
+            // Positional argument - dataset path
+            dataset_path = argv[i];
         }
     }
 
-    if (remaining_args.empty()) {
-        std::fprintf(stderr, "usage: %s [--hidden-size N] [--tbptt N] dataset.bin\n", argv[0]);
-        return 1;
+    // Check if data preprocessing is needed
+    bool needs_preprocessing = force_regen ||
+                              !std::filesystem::exists(dataset_path) ||
+                              !std::filesystem::exists("vocab.json");
+
+    if (needs_preprocessing) {
+        if (!std::filesystem::exists(data_file)) {
+            std::fprintf(stderr, "Error: Data file '%s' not found. Please provide a text file for training.\n", data_file.c_str());
+            std::fprintf(stderr, "You can:\n");
+            std::fprintf(stderr, "  1. Place a 'data.txt' file in the current directory\n");
+            std::fprintf(stderr, "  2. Specify a custom file with --data <file>\n");
+            return 1;
+        }
+
+        std::printf("Preprocessing data from '%s'...\n", data_file.c_str());
+        try {
+            preprocess_data(data_file, dataset_path, "vocab.json");
+            std::printf("Data preprocessing completed.\n");
+        } catch (const std::exception& e) {
+            std::fprintf(stderr, "Error during data preprocessing: %s\n", e.what());
+            return 1;
+        }
+    } else {
+        std::printf("Using existing dataset '%s'\n", dataset_path.c_str());
     }
-    const char* dataset_path = remaining_args[0].c_str();
 
     // --- load dataset ---
-    FILE* f = std::fopen(dataset_path, "rb");
+    FILE* f = std::fopen(dataset_path.c_str(), "rb");
     if (!f) { std::perror("dataset fopen"); return 1; }
     std::fseek(f, 0, SEEK_END);
     size_t fsize = std::ftell(f);

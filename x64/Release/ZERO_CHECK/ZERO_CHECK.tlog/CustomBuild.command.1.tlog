@@ -1,0 +1,10 @@
+^C:\USERS\BASH\ARCAI-V2\CMAKEFILES\2379B950FA290A707AAB85752129BF5A\GENERATE.STAMP.RULE
+setlocal
+C:\Users\Bash\AppData\Local\Programs\Python\Python310\Lib\site-packages\cmake\data\bin\cmake.exe -SC:/Users/Bash/ArcAI-V2 -BC:/Users/Bash/ArcAI-V2 --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file C:/Users/Bash/ArcAI-V2/LightwatchAI.sln
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

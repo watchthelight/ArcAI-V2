@@ -1,0 +1,5 @@
+C:/Users/Bash/ArcAI-V2/build_cuda/CMakeFiles/arc_train.dir
+C:/Users/Bash/ArcAI-V2/build_cuda/CMakeFiles/arc_run.dir
+C:/Users/Bash/ArcAI-V2/build_cuda/CMakeFiles/INSTALL.dir
+C:/Users/Bash/ArcAI-V2/build_cuda/CMakeFiles/ALL_BUILD.dir
+C:/Users/Bash/ArcAI-V2/build_cuda/CMakeFiles/ZERO_CHECK.dir

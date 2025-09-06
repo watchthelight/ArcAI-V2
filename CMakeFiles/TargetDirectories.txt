@@ -1,0 +1,8 @@
+C:/Users/Bash/ArcAI-V2/CMakeFiles/lightwatch_train.dir
+C:/Users/Bash/ArcAI-V2/CMakeFiles/lightwatch_run.dir
+C:/Users/Bash/ArcAI-V2/CMakeFiles/arc_train.dir
+C:/Users/Bash/ArcAI-V2/CMakeFiles/arc_run.dir
+C:/Users/Bash/ArcAI-V2/CMakeFiles/simple_cuda_test.dir
+C:/Users/Bash/ArcAI-V2/CMakeFiles/INSTALL.dir
+C:/Users/Bash/ArcAI-V2/CMakeFiles/ALL_BUILD.dir
+C:/Users/Bash/ArcAI-V2/CMakeFiles/ZERO_CHECK.dir
