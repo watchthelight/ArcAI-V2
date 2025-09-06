@@ -8,6 +8,7 @@
 #include <conio.h>
 #include <windows.h>
 #include <io.h>
+#define fopen_s(pFile,filename,mode) (((*(pFile))=fopen((filename),(mode)))==NULL)
 #else
 #include <unistd.h>
 #include <termios.h>

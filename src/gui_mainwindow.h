@@ -15,6 +15,7 @@
 #include <QDoubleSpinBox>
 #include <QLineEdit>
 #include <QDialogButtonBox>
+#include <QMessageBox>
 
 class MainWindow : public QMainWindow {
     Q_OBJECT

@@ -13,6 +13,10 @@
 #include "lightwatch_config.h"
 #include "data_preprocess.h"
 
+#ifdef _WIN32
+#define fopen_s(pFile,filename,mode) (((*(pFile))=fopen((filename),(mode)))==NULL)
+#endif
+
 // Adam optimizer parameters
 const float BETA1 = 0.9f;
 const float BETA2 = 0.999f;
