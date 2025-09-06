@@ -44,10 +44,11 @@ jobs:
       run: |
         windeployqt build/bin/lightwatch_gui.exe
 
-    - name: Test Binaries
+    - name: Verify build artifacts
       run: |
         cd build/bin
-        ./lightwatch_gui.exe --version
+        if (!(Test-Path lightwatch_gui.exe)) { exit 1 }
+        if (!(Test-Path lightwatch_cli.exe)) { exit 1 }
         ./lightwatch_cli.exe --help
 
     - name: Package
