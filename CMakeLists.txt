@@ -74,7 +74,9 @@ set(LIGHTWATCH_HEADERS
 
 # LightwatchAI executables
 add_executable(lightwatch_train src/lightwatch_train.cpp ${LIGHTWATCH_SOURCES} ${LIGHTWATCH_HEADERS})
+set_target_properties(lightwatch_train PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 add_executable(lightwatch_run src/lightwatch_run.cpp ${LIGHTWATCH_SOURCES} ${LIGHTWATCH_HEADERS})
+set_target_properties(lightwatch_run PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 # Compiler flags with platform-specific OpenMP detection
 if(MSVC)
@@ -125,6 +127,7 @@ endif()
 
 # Data preprocessing executable
 add_executable(data_preprocess src/data_preprocess.cpp src/data_preprocess.h)
+set_target_properties(data_preprocess PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 # Apply same compiler flags as other executables
 if(MSVC)
@@ -136,6 +139,7 @@ endif()
 
 # Simple CUDA test executable
 add_executable(simple_cuda_test src/simple_cuda_test.cpp)
+set_target_properties(simple_cuda_test PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 # Apply same compiler flags as other executables
 if(MSVC)
@@ -152,6 +156,7 @@ endif()
 
 # CLI executable (generation)
 add_executable(lightwatch_cli src/lightwatch_run.cpp ${LIGHTWATCH_SOURCES} ${LIGHTWATCH_HEADERS})
+set_target_properties(lightwatch_cli PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 # Apply same compiler flags as other executables
 if(MSVC)
@@ -166,6 +171,7 @@ endif()
 # GUI executable
 if(QT_FOUND)
     add_executable(lightwatch_gui src/lightwatch_gui.cpp src/gui_mainwindow.cpp src/gui_mainwindow.h ${LIGHTWATCH_SOURCES} ${LIGHTWATCH_HEADERS})
+    set_target_properties(lightwatch_gui PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
     target_link_libraries(lightwatch_gui Qt${QT_VERSION}::Widgets)
 
     # Apply same compiler flags as other executables
