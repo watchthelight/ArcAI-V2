@@ -45,27 +45,9 @@ set(LIGHTWATCH_HEADERS
     lightwatch_config.h
 )
 
-# Legacy source files (for backward compatibility)
-set(LEGACY_SOURCES
-    arc_train.cpp
-    arc_run.cpp
-)
-
-set(LEGACY_HEADERS
-    arc_types.h
-    arc_kernels.h
-    arc_bptt.h
-    arc_dataset.h
-    arc_generate.h
-)
-
-# New LightwatchAI executables
+# LightwatchAI executables
 add_executable(lightwatch_train lightwatch_train.cpp ${LIGHTWATCH_SOURCES} ${LIGHTWATCH_HEADERS})
 add_executable(lightwatch_run lightwatch_run.cpp ${LIGHTWATCH_SOURCES} ${LIGHTWATCH_HEADERS})
-
-# Legacy executables (for backward compatibility)
-add_executable(arc_train arc_train.cpp ${LEGACY_HEADERS})
-add_executable(arc_run arc_run.cpp ${LEGACY_HEADERS})
 
 # Compiler flags
 if(MSVC)
@@ -73,36 +55,19 @@ if(MSVC)
     string(REPLACE "/RTC1" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
     string(REPLACE "/RTC1" "" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
     
-    # Legacy executables
-    target_compile_options(arc_train PRIVATE /W4 /O2)
-    target_compile_options(arc_run PRIVATE /W4 /O2)
-    target_compile_options(arc_train PRIVATE $<$<CONFIG:Release>:/RTC- >)
-    target_compile_options(arc_run PRIVATE $<$<CONFIG:Release>:/RTC- >)
-    
-    # New LightwatchAI executables
+    # LightwatchAI executables
     target_compile_options(lightwatch_train PRIVATE /W4 /O2)
     target_compile_options(lightwatch_run PRIVATE /W4 /O2)
     target_compile_options(lightwatch_train PRIVATE $<$<CONFIG:Release>:/RTC- >)
     target_compile_options(lightwatch_run PRIVATE $<$<CONFIG:Release>:/RTC- >)
 else()
-    # Legacy executables
-    target_compile_options(arc_train PRIVATE -Wall -Wextra -O3 -fopenmp)
-    target_compile_options(arc_run PRIVATE -Wall -Wextra -O3 -fopenmp)
-    
-    # New LightwatchAI executables
+    # LightwatchAI executables
     target_compile_options(lightwatch_train PRIVATE -Wall -Wextra -O3 -fopenmp)
     target_compile_options(lightwatch_run PRIVATE -Wall -Wextra -O3 -fopenmp)
 endif()
 
 # HIP support
 if(USE_HIP)
-    # Legacy executables
-    target_compile_definitions(arc_train PRIVATE USE_HIP)
-    target_compile_definitions(arc_run PRIVATE USE_HIP)
-    target_link_libraries(arc_train hip::device)
-    target_link_libraries(arc_run hip::device)
-    
-    # New LightwatchAI executables
     target_compile_definitions(lightwatch_train PRIVATE USE_HIP)
     target_compile_definitions(lightwatch_run PRIVATE USE_HIP)
     target_link_libraries(lightwatch_train hip::device)
@@ -111,13 +76,6 @@ endif()
 
 # CUDA support
 if(USE_CUDA)
-    # Legacy executables
-    target_compile_definitions(arc_train PRIVATE USE_CUDA)
-    target_compile_definitions(arc_run PRIVATE USE_CUDA)
-    target_link_libraries(arc_train CUDA::cudart CUDA::cublas)
-    target_link_libraries(arc_run CUDA::cudart CUDA::cublas)
-    
-    # New LightwatchAI executables
     target_compile_definitions(lightwatch_train PRIVATE USE_CUDA)
     target_compile_definitions(lightwatch_run PRIVATE USE_CUDA)
     target_link_libraries(lightwatch_train CUDA::cudart CUDA::cublas)
@@ -126,13 +84,6 @@ endif()
 
 # OpenBLAS support
 if(USE_OPENBLAS)
-    # Legacy executables
-    target_compile_definitions(arc_train PRIVATE USE_OPENBLAS)
-    target_compile_definitions(arc_run PRIVATE USE_OPENBLAS)
-    target_link_libraries(arc_train ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES})
-    target_link_libraries(arc_run ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES})
-    
-    # New LightwatchAI executables
     target_compile_definitions(lightwatch_train PRIVATE USE_OPENBLAS)
     target_compile_definitions(lightwatch_run PRIVATE USE_OPENBLAS)
     target_link_libraries(lightwatch_train ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES})
@@ -157,6 +108,6 @@ if(USE_CUDA)
 endif()
 
 # Install
-install(TARGETS lightwatch_train lightwatch_run arc_train arc_run simple_cuda_test
+install(TARGETS lightwatch_train lightwatch_run simple_cuda_test
     RUNTIME DESTINATION bin
 )
