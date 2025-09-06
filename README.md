@@ -1,11 +1,13 @@
 # ArcAI V2
 
-A high-performance, custom implementation of a character-level Recurrent Neural Network (RNN) language model, optimized for AMD GPUs using HIP. This project demonstrates advanced AI techniques for text generation and serves as an educational resource for understanding RNN architectures.
+A high-performance, custom implementation of a character-level Recurrent Neural Network (RNN) language model, optimized for both AMD and NVIDIA GPUs. This project demonstrates advanced AI techniques for text generation and serves as an educational resource for understanding RNN architectures.
 
 ## Features
 
 - **LSTM Architecture**: Long Short-Term Memory networks for better long-term dependency modeling
-- **HIP GPU Acceleration**: Optimized for AMD GPUs using ROCm/HIP
+- **Multi-GPU Support**: 
+  - **NVIDIA CUDA**: Optimized for NVIDIA GPUs using CUDA and cuBLAS
+  - **AMD HIP**: Optimized for AMD GPUs using ROCm/HIP
 - **Adam Optimizer**: Advanced optimization algorithm for faster convergence
 - **Truncated BPTT**: Efficient training with configurable truncation length
 - **Character-Level Generation**: Generate text at the byte level (256 possible tokens)
@@ -25,9 +27,10 @@ A high-performance, custom implementation of a character-level Recurrent Neural 
 ## Requirements
 
 - C++17 compatible compiler
-- ROCm/HIP for AMD GPU support (optional, CPU fallback available)
+- **For NVIDIA GPU support**: CUDA Toolkit 12.0+ and cuBLAS
+- **For AMD GPU support**: ROCm/HIP (optional, CPU fallback available)
 - OpenBLAS (optional, for CPU acceleration)
-- CMake (for building)
+- CMake 3.16+ (for building)
 
 ## Building
 
@@ -38,6 +41,8 @@ A high-performance, custom implementation of a character-level Recurrent Neural 
    ```
 
 2. Build with CMake:
+
+   **For CPU-only build:**
    ```bash
    mkdir build
    cd build
@@ -45,7 +50,27 @@ A high-performance, custom implementation of a character-level Recurrent Neural 
    make
    ```
 
-3. For HIP support, ensure ROCm is installed and set `USE_HIP=ON` in CMake.
+   **For NVIDIA CUDA support:**
+   ```bash
+   mkdir build_cuda
+   cd build_cuda
+   cmake .. -DUSE_CUDA=ON
+   make
+   ```
+
+   **For AMD HIP support:**
+   ```bash
+   mkdir build_hip
+   cd build_hip
+   cmake .. -DUSE_HIP=ON
+   make
+   ```
+
+3. **Testing CUDA Build:**
+   ```bash
+   # Test CUDA functionality
+   ./simple_cuda_test
+   ```
 
 ## Usage
 
