@@ -28,6 +28,7 @@ jobs:
           cd build/bin
           if (!(Test-Path lightwatch_gui.exe)) { exit 1 }
           if (!(Test-Path lightwatch_cli.exe)) { exit 1 }
+          ./lightwatch_cli.exe --checkpoint dummy
       - name: Create Release
         uses: actions/create-release@v1
         env:
