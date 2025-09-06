@@ -168,29 +168,29 @@ add_custom_command(TARGET lightwatch_cli POST_BUILD
 
 # GUI executable
 if(QT_FOUND)
-    add_executable(LightwatchAI src/lightwatch_gui.cpp src/gui_mainwindow.cpp src/gui_mainwindow.h ${LIGHTWATCH_SOURCES} ${LIGHTWATCH_HEADERS})
-    target_link_libraries(LightwatchAI Qt${QT_VERSION}::Widgets)
+    add_executable(lightwatch_gui src/lightwatch_gui.cpp src/gui_mainwindow.cpp src/gui_mainwindow.h ${LIGHTWATCH_SOURCES} ${LIGHTWATCH_HEADERS})
+    target_link_libraries(lightwatch_gui Qt${QT_VERSION}::Widgets)
 
     # Apply same compiler flags as other executables
     if(MSVC)
-        target_compile_options(LightwatchAI PRIVATE /W4 /O2 /openmp)
-        target_compile_definitions(LightwatchAI PRIVATE _CRT_SECURE_NO_WARNINGS)
+        target_compile_options(lightwatch_gui PRIVATE /W4 /O2 /openmp)
+        target_compile_definitions(lightwatch_gui PRIVATE _CRT_SECURE_NO_WARNINGS)
     else()
-        target_compile_options(LightwatchAI PRIVATE -Wall -Wextra -O3 ${OPENMP_FLAGS})
+        target_compile_options(lightwatch_gui PRIVATE -Wall -Wextra -O3 ${OPENMP_FLAGS})
     endif()
 
     # Post-build command
-    add_custom_command(TARGET LightwatchAI POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:LightwatchAI> ${BIN_DIR}/
-        COMMENT "Copying LightwatchAI to bin directory"
+    add_custom_command(TARGET lightwatch_gui POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:lightwatch_gui> ${BIN_DIR}/
+        COMMENT "Copying lightwatch_gui to bin directory"
     )
 
     # Bundle Qt dependencies for Windows standalone executable
     if(WIN32)
         find_program(WINDEPLOYQT_EXECUTABLE windeployqt HINTS ${QT_BIN_DIR})
         if(WINDEPLOYQT_EXECUTABLE)
-            add_custom_command(TARGET LightwatchAI POST_BUILD
-                COMMAND ${WINDEPLOYQT_EXECUTABLE} $<TARGET_FILE:LightwatchAI>
+            add_custom_command(TARGET lightwatch_gui POST_BUILD
+                COMMAND ${WINDEPLOYQT_EXECUTABLE} $<TARGET_FILE:lightwatch_gui>
                 COMMENT "Bundling Qt runtime libraries"
             )
         endif()
@@ -220,7 +220,7 @@ add_custom_command(TARGET simple_cuda_test POST_BUILD
 
 # Install
 set(INSTALL_TARGETS lightwatch_train lightwatch_run data_preprocess simple_cuda_test)
-if(QT_FOUND)
+if(QT_FOUND AND TARGET lightwatch_gui)
     list(APPEND INSTALL_TARGETS lightwatch_gui)
 endif()
 install(TARGETS ${INSTALL_TARGETS}

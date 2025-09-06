@@ -3,7 +3,7 @@ name: Release Windows GUI
 on:
   push:
     branches:
-      - master
+      - main
 
 jobs:
   build-and-release:
@@ -26,27 +26,34 @@ jobs:
       run: |
         mkdir build
         cd build
-        cmake .. -G "Ninja" -DENABLE_GUI=ON
+        cmake .. -G "Visual Studio 17 2022" -A x64 -DENABLE_GUI=ON
 
     - name: Build
       run: |
         cd build
-        ninja
+        cmake --build . --config Release
+
+    - name: Verify GUI Target Exists
+      run: |
+        if (!(Test-Path build/bin/lightwatch_gui.exe)) {
+          Write-Error "lightwatch_gui.exe not found. GUI target may not have been built."
+          exit 1
+        }
 
     - name: Bundle Qt Dependencies
       run: |
-        windeployqt build/bin/LightwatchAI.exe
+        windeployqt build/bin/lightwatch_gui.exe
 
     - name: Test Binaries
       run: |
         cd build/bin
-        ./LightwatchAI.exe --version
+        ./lightwatch_gui.exe --version
         ./lightwatch_cli.exe --help
 
     - name: Package
       run: |
         cd build/bin
-        7z a ../../LightwatchAI.zip LightwatchAI.exe *
+        7z a ../../LightwatchAI.zip lightwatch_gui.exe *
 
     - name: Create Release
       uses: actions/create-release@v1
