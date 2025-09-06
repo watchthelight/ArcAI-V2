@@ -1,3 +1,4 @@
+# Force GitHub to detect this workflow anew
 name: LightwatchAI Build & Release
 
 on:
