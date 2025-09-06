@@ -4,15 +4,16 @@ project(LightwatchAI VERSION 2.0 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Create bin directory in project root
-set(BIN_DIR ${CMAKE_SOURCE_DIR}/bin)
-file(MAKE_DIRECTORY ${BIN_DIR})
-
 # Options
 option(USE_HIP "Enable HIP for AMD GPU support" OFF)
 option(USE_CUDA "Enable CUDA for NVIDIA GPU support" OFF)
 option(USE_OPENBLAS "Use OpenBLAS for matrix operations" OFF)
 option(ENABLE_GUI "Enable GUI build with Qt" ON)
+
+# Set global runtime output directory to build/bin
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/bin)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/bin)
 
 # Find packages
 if(USE_HIP)
@@ -160,11 +161,7 @@ else()
     target_compile_options(lightwatch_cli PRIVATE -Wall -Wextra -O3 ${OPENMP_FLAGS})
 endif()
 
-# Post-build command
-add_custom_command(TARGET lightwatch_cli POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:lightwatch_cli> ${BIN_DIR}/
-    COMMENT "Copying lightwatch_cli to bin directory"
-)
+
 
 # GUI executable
 if(QT_FOUND)
@@ -179,11 +176,7 @@ if(QT_FOUND)
         target_compile_options(lightwatch_gui PRIVATE -Wall -Wextra -O3 ${OPENMP_FLAGS})
     endif()
 
-    # Post-build command
-    add_custom_command(TARGET lightwatch_gui POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:lightwatch_gui> ${BIN_DIR}/
-        COMMENT "Copying lightwatch_gui to bin directory"
-    )
+
 
     # Bundle Qt dependencies for Windows standalone executable
     if(WIN32)
@@ -197,26 +190,7 @@ if(QT_FOUND)
     endif()
 endif()
 
-# Post-build commands to copy executables to bin/ directory
-add_custom_command(TARGET lightwatch_train POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:lightwatch_train> ${BIN_DIR}/
-    COMMENT "Copying lightwatch_train to bin directory"
-)
 
-add_custom_command(TARGET lightwatch_run POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:lightwatch_run> ${BIN_DIR}/
-    COMMENT "Copying lightwatch_run to bin directory"
-)
-
-add_custom_command(TARGET data_preprocess POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:data_preprocess> ${BIN_DIR}/
-    COMMENT "Copying data_preprocess to bin directory"
-)
-
-add_custom_command(TARGET simple_cuda_test POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:simple_cuda_test> ${BIN_DIR}/
-    COMMENT "Copying simple_cuda_test to bin directory"
-)
 
 # Install
 set(INSTALL_TARGETS lightwatch_train lightwatch_run data_preprocess simple_cuda_test)
