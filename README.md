@@ -1,24 +1,20 @@
 # LightwatchAI
 
-A high-performance, custom implementation of a character-level Recurrent Neural Network (RNN) language model, optimized for both AMD and NVIDIA GPUs. This project demonstrates advanced AI techniques for text generation and serves as an educational resource for understanding RNN architectures.
+A high-performance, custom implementation of a character-level LSTM language model with an interactive configuration system. Features cross-platform support for Windows, Linux, and macOS with GPU acceleration for both NVIDIA and AMD hardware.
 
 ## Features
 
-- **LSTM Architecture**: Long Short-Term Memory networks for better long-term dependency modeling
-- **Interactive Model Configuration**: Terminal-based menu system for selecting model parameters
-- **Multi-GPU Support**: 
+- **🎯 Interactive Model Configuration**: Terminal-based menu system with arrow key navigation
+- **🧠 LSTM Architecture**: Long Short-Term Memory networks for superior text generation
+- **⚡ Multi-GPU Support**: 
   - **NVIDIA CUDA**: Optimized for NVIDIA GPUs using CUDA and cuBLAS
   - **AMD HIP**: Optimized for AMD GPUs using ROCm/HIP
-- **Adam Optimizer**: Advanced optimization algorithm for faster convergence
-- **Truncated BPTT**: Efficient training with configurable truncation length
-- **Character-Level Generation**: Generate text at the byte level (256 possible tokens)
-- **Checkpointing**: Save and resume training progress
-- **OpenMP Parallelization**: CPU fallback with multi-threading support
-- **BLAS Integration**: Optional OpenBLAS for accelerated matrix operations
+- **🔧 Runtime Configuration**: Choose model size and sequence length interactively
+- **💾 Smart Checkpointing**: Save and resume training progress automatically
+- **🚀 Adam Optimizer**: Advanced optimization for faster convergence
+- **🔄 Cross-Platform**: Windows, Linux, macOS with shell-specific instructions
 
 ## Interactive Configuration
-
-LightwatchAI now features an interactive configuration system that allows you to select model parameters before training or running:
 
 ### Model Size Options
 - **Minimum** → 64 hidden units
@@ -39,166 +35,331 @@ LightwatchAI now features an interactive configuration system that allows you to
 - **Longer** → 64 steps
 - **Longest** → 128 steps
 
-## Architecture
-
-- **Model Type**: LSTM with interactive configurable hidden size
-- **Vocabulary**: 256 tokens (0-255 byte values)
-- **Batch Size**: 16 sequences
-- **Sequence Length**: 64 timesteps
-- **TBPTT Length**: Interactive configurable (1-128 steps)
-- **Learning Rate**: 0.001 (Adam)
-
 ## Requirements
 
-- C++17 compatible compiler
-- **For NVIDIA GPU support**: CUDA Toolkit 12.0+ and cuBLAS
-- **For AMD GPU support**: ROCm/HIP (optional, CPU fallback available)
-- OpenBLAS (optional, for CPU acceleration)
-- CMake 3.16+ (for building)
+- **C++17** compatible compiler
+- **CMake 3.16+** for building
+- **Optional**: CUDA Toolkit 12.0+ (NVIDIA GPU support)
+- **Optional**: ROCm/HIP (AMD GPU support)
+- **Optional**: OpenBLAS (CPU acceleration)
 
-## Building
+## Platform-Specific Setup
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/watchthelight/LightwatchAI.git
-   cd LightwatchAI
-   ```
+### Windows (PowerShell/Command Prompt)
 
-2. Build with CMake:
+**Prerequisites:**
+- Visual Studio 2019/2022 with C++ tools
+- CMake (install via Visual Studio Installer or download from cmake.org)
+- Git for Windows
 
-   **For CPU-only build:**
-   ```bash
-   mkdir build
-   cd build
-   cmake ..
-   make
-   ```
+**Clone and Build:**
+```powershell
+# Clone repository
+git clone https://github.com/watchthelight/LightwatchAI.git
+cd LightwatchAI
 
-   **For NVIDIA CUDA support:**
-   ```bash
-   mkdir build_cuda
-   cd build_cuda
-   cmake .. -DUSE_CUDA=ON
-   make
-   ```
+# CPU-only build
+mkdir build_cpu
+cd build_cpu
+cmake .. -G "Visual Studio 17 2022" -A x64
+cmake --build . --config Release
+cd ..
 
-   **For AMD HIP support:**
-   ```bash
-   mkdir build_hip
-   cd build_hip
-   cmake .. -DUSE_HIP=ON
-   make
-   ```
+# NVIDIA CUDA build (if CUDA is installed)
+mkdir build_cuda
+cd build_cuda
+cmake .. -G "Visual Studio 17 2022" -A x64 -DUSE_CUDA=ON
+cmake --build . --config Release
+cd ..
+```
 
-3. **Testing CUDA Build:**
-   ```bash
-   # Test CUDA functionality
-   ./simple_cuda_test
-   ```
+**Run Executables:**
+```powershell
+# Interactive training
+.\Release\lightwatch_train.exe dataset.bin
 
-## Usage
+# Interactive generation
+.\Release\lightwatch_run.exe checkpoint_latest.bin
 
-### Interactive Training (New!)
+# With command line overrides
+.\Release\lightwatch_train.exe dataset.bin --hidden-size 256 --tbptt 64
+```
 
-Use the new interactive configuration system:
+### Linux (Bash Shell)
 
+**Prerequisites (Ubuntu/Debian):**
 ```bash
+# Install build tools
+sudo apt update
+sudo apt install build-essential cmake git
+
+# Optional: CUDA support (NVIDIA)
+# Download and install CUDA Toolkit from developer.nvidia.com
+
+# Optional: ROCm support (AMD)
+# Follow ROCm installation guide for your distribution
+
+# Optional: OpenBLAS
+sudo apt install libopenblas-dev
+```
+
+**Clone and Build:**
+```bash
+# Clone repository
+git clone https://github.com/watchthelight/LightwatchAI.git
+cd LightwatchAI
+
+# CPU-only build
+mkdir build_cpu && cd build_cpu
+cmake ..
+make -j$(nproc)
+cd ..
+
+# NVIDIA CUDA build
+mkdir build_cuda && cd build_cuda
+cmake .. -DUSE_CUDA=ON
+make -j$(nproc)
+cd ..
+
+# AMD HIP build
+mkdir build_hip && cd build_hip
+cmake .. -DUSE_HIP=ON
+make -j$(nproc)
+cd ..
+
+# OpenBLAS build
+mkdir build_blas && cd build_blas
+cmake .. -DUSE_OPENBLAS=ON
+make -j$(nproc)
+cd ..
+```
+
+**Run Executables:**
+```bash
+# Interactive training
 ./lightwatch_train dataset.bin
+
+# Interactive generation
+./lightwatch_run checkpoint_latest.bin
+
+# With command line overrides
+./lightwatch_train dataset.bin --hidden-size 256 --tbptt 64
 ```
 
-This will launch an interactive menu where you can:
-1. Select model size using arrow keys (↑/↓)
-2. Select TBPTT length using arrow keys (↑/↓)
-3. Press Enter to confirm selections
+### macOS (Bash/Zsh Shell)
 
-The model will train for 10,000 steps, saving checkpoints every 10 steps.
-
-### Interactive Generation (New!)
-
-Generate text with interactive configuration:
-
+**Prerequisites:**
 ```bash
-./lightwatch_run checkpoint_latest.bin --len 1000 --temp 0.8 --seed "Hello world"
+# Install Xcode Command Line Tools
+xcode-select --install
+
+# Install Homebrew (if not already installed)
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+# Install CMake
+brew install cmake
+
+# Optional: OpenBLAS
+brew install openblas
 ```
+
+**Clone and Build:**
+```bash
+# Clone repository
+git clone https://github.com/watchthelight/LightwatchAI.git
+cd LightwatchAI
+
+# CPU-only build
+mkdir build_cpu && cd build_cpu
+cmake ..
+make -j$(sysctl -n hw.ncpu)
+cd ..
+
+# OpenBLAS build (recommended for macOS)
+mkdir build_blas && cd build_blas
+cmake .. -DUSE_OPENBLAS=ON
+make -j$(sysctl -n hw.ncpu)
+cd ..
+```
+
+**Run Executables:**
+```bash
+# Interactive training
+./lightwatch_train dataset.bin
+
+# Interactive generation
+./lightwatch_run checkpoint_latest.bin
+```
+
+### Fish Shell (Linux/macOS)
+
+**Build Commands:**
+```fish
+# Clone repository
+git clone https://github.com/watchthelight/LightwatchAI.git
+cd LightwatchAI
+
+# CPU build
+mkdir build_cpu; and cd build_cpu
+cmake ..
+make -j(nproc)  # Linux
+# make -j(sysctl -n hw.ncpu)  # macOS
+cd ..
+
+# CUDA build (Linux only)
+mkdir build_cuda; and cd build_cuda
+cmake .. -DUSE_CUDA=ON
+make -j(nproc)
+cd ..
+```
+
+**Run Executables:**
+```fish
+# Interactive training
+./lightwatch_train dataset.bin
+
+# Interactive generation  
+./lightwatch_run checkpoint_latest.bin
+
+# Command line override
+./lightwatch_train dataset.bin --hidden-size 256 --tbptt 64
+```
+
+## Usage Guide
+
+### Interactive Mode
+
+When you run the executables without command line overrides, you'll see an interactive menu:
+
+```
+=== LightwatchAI Configuration ===
+Select Model Size (Hidden Layer Size):
+
+Use ↑/↓ arrow keys to navigate, Enter to select:
+
+  Minimum (64)
+  Mini (96)
+→ NotSoMini (128)
+  Normaal (160)
+  Normalish (192)
+  Big (224)
+  Bigger (256)
+  Biggest (320)
+  LiterallyInsane (512)
+
+Press 'q' to quit
+```
+
+**Navigation:**
+- **↑/↓ Arrow Keys**: Navigate menu options
+- **Enter**: Select current option
+- **q**: Quit application
 
 ### Command Line Override
 
-You can override the interactive configuration with command line flags:
+Skip the interactive menu by providing parameters directly:
 
 ```bash
-# Training with specific parameters
-./lightwatch_train dataset.bin --hidden-size 256 --tbptt 64
+# Training with specific configuration
+./lightwatch_train dataset.bin --hidden-size 512 --tbptt 128
 
-# Generation with specific parameters  
-./lightwatch_run checkpoint_latest.bin --hidden-size 256 --tbptt 64 --len 1000 --temp 0.8
+# Generation with specific configuration
+./lightwatch_run checkpoint_latest.bin --hidden-size 512 --tbptt 128 --len 2000 --temp 0.9 --seed "Once upon a time"
 ```
 
-### Legacy Usage
+### Non-Interactive Environments
 
-The original executables are still available for backward compatibility:
+The system automatically detects non-interactive environments (pipes, scripts, CI/CD) and uses default values:
+- **Hidden Size**: 128
+- **TBPTT Length**: 32
+
+### Generation Options
 
 ```bash
-# Legacy training (uses compile-time constants)
-./arc_train dataset.bin
+./lightwatch_run checkpoint.bin [OPTIONS]
 
-# Legacy generation
-./arc_run checkpoint_latest.bin --len 1000 --temp 0.8 --seed "Hello world"
+Options:
+  --hidden-size N    Model hidden size (must match training)
+  --tbptt N         TBPTT length (must match training)  
+  --len N           Generate N characters (default: 100)
+  --temp T          Sampling temperature 0.1-2.0 (default: 1.0)
+  --topk K          Top-K sampling, 0=disabled (default: 50)
+  --seed "text"     Initial seed text (default: empty)
 ```
 
-### Configuration Options
+## Preparing Training Data
 
-**Interactive Configuration:**
-- Use arrow keys (↑/↓) to navigate menu options
-- Press Enter to select
-- Press 'q' to quit
-- Automatically falls back to defaults in non-interactive environments
+Convert your text file to binary format:
 
-**Command Line Flags:**
-- `--hidden-size N`: Set hidden layer size (64-512)
-- `--tbptt N`: Set TBPTT length (1-128)
-- `--len N`: Generate N characters
-- `--temp T`: Sampling temperature (0.1-2.0)
-- `--topk K`: Top-K sampling (0 = no limit)
-- `--seed STR`: Initial seed text
+```bash
+# Create a simple Python script to convert text to binary
+python3 -c "
+import sys
+with open(sys.argv[1], 'r', encoding='utf-8') as f:
+    text = f.read()
+with open(sys.argv[2], 'wb') as f:
+    f.write(text.encode('utf-8'))
+" input.txt dataset.bin
+```
+
+## Troubleshooting
+
+### Windows Issues
+- **"MSVCR120.dll missing"**: Install Visual C++ Redistributable
+- **CMake not found**: Add CMake to PATH or reinstall with "Add to PATH" option
+- **CUDA not detected**: Ensure CUDA_PATH environment variable is set
+
+### Linux Issues
+- **"Permission denied"**: Make executables executable with `chmod +x lightwatch_*`
+- **CUDA issues**: Check `nvidia-smi` and ensure CUDA_HOME is set
+- **Missing libraries**: Install development packages (`-dev` suffix)
+
+### macOS Issues
+- **"Developer cannot be verified"**: Run `sudo spctl --master-disable` temporarily
+- **OpenMP not found**: Install with `brew install libomp`
+
+### General Issues
+- **Interactive menu not working**: Ensure terminal supports ANSI escape sequences
+- **Arrow keys not working**: Try using a different terminal emulator
+- **Build fails**: Check CMake version is 3.16+ and compiler supports C++17
 
 ## Project Structure
 
-### New LightwatchAI Files
-- `lightwatch_types.h/cpp`: Runtime configurable model definitions
-- `lightwatch_kernels.h`: Core computation kernels (forward/backward)
-- `lightwatch_bptt.h`: Backpropagation through time implementation
-- `lightwatch_config.h/cpp`: Interactive configuration system
-- `lightwatch_train.cpp`: New training executable with interactive config
-- `lightwatch_run.cpp`: New inference executable with interactive config
-- `lightwatch_dataset.h`: Data loading utilities
-- `lightwatch_generate.h`: Sampling utilities
+```
+LightwatchAI/
+├── lightwatch_config.cpp/h     # Interactive configuration system
+├── lightwatch_types.cpp/h      # Runtime configurable parameters  
+├── lightwatch_train.cpp        # Training executable
+├── lightwatch_run.cpp          # Generation executable
+├── lightwatch_kernels.h        # LSTM computation kernels
+├── lightwatch_bptt.h           # Backpropagation implementation
+├── lightwatch_dataset.h        # Data loading utilities
+├── lightwatch_generate.h       # Text generation utilities
+├── simple_cuda_test.cpp        # CUDA functionality test
+└── CMakeLists.txt              # Build configuration
+```
 
-### Legacy Files (Backward Compatibility)
-- `arc_types.h`: Original model definitions and constants
-- `arc_kernels.h`: Original computation kernels
-- `arc_bptt.h`: Original BPTT implementation
-- `arc_train.cpp`: Original training executable
-- `arc_run.cpp`: Original inference executable
-- `arc_dataset.h`: Original data loading utilities
-- `arc_generate.h`: Original sampling utilities
+## Performance Notes
 
-## Performance Improvements
-
-Compared to the original vanilla RNN:
-- **10x Accuracy**: LSTM captures long-term dependencies better
-- **GPU Acceleration**: HIP enables AMD GPU training/inference
-- **Faster Convergence**: Adam optimizer vs SGD
-- **Larger Model**: Increased hidden size from 128 to 256
-- **Longer Context**: TBPTT length increased from 1 to 32
+- **CPU Performance**: Use OpenBLAS for significant speedup on CPU
+- **GPU Memory**: Larger models (Biggest, LiterallyInsane) require more VRAM
+- **Training Speed**: CUDA > HIP > OpenBLAS > Plain CPU
+- **Model Quality**: Larger hidden sizes generally produce better text
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit issues and pull requests.
+Contributions welcome! Please:
+1. Fork the repository
+2. Create a feature branch
+3. Test on multiple platforms
+4. Submit a pull request
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+MIT License - see [LICENSE](LICENSE) file for details.
 
 ## Acknowledgments
 
-Inspired by Andrej Karpathy's char-rnn and various open-source RNN implementations.
+- Inspired by Andrej Karpathy's char-rnn
+- Built with modern C++17 and cross-platform compatibility in mind
+- Community contributions for platform-specific optimizations
