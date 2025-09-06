@@ -439,25 +439,32 @@ with open(sys.argv[2], 'wb') as f:
 
 ```
 LightwatchAI/
-├── bin/                        # Built executables (after build)
-│   ├── lightwatch_train(.exe)  # Training executable
-│   ├── lightwatch_run(.exe)    # Generation executable
-│   ├── lightwatch_gui(.exe)    # GUI executable (if Qt available)
-│   ├── data_preprocess(.exe)   # Data preprocessing utility
-│   └── simple_cuda_test(.exe)  # CUDA functionality test
-├── data_preprocess.cpp/h       # Data preprocessing utilities
-├── lightwatch_config.cpp/h     # Interactive configuration system
-├── lightwatch_types.cpp/h      # Runtime configurable parameters
+├── src/                        # Source files
+│   ├── data_preprocess.cpp/h   # Data preprocessing utilities
+│   ├── lightwatch_config.cpp/h # Interactive configuration system
+│   ├── lightwatch_types.cpp/h  # Runtime configurable parameters
+│   ├── lightwatch_gui.cpp      # GUI main application
+│   ├── gui_mainwindow.h/.cpp   # GUI main window implementation
+│   ├── lightwatch_kernels.h    # LSTM computation kernels
+│   ├── lightwatch_bptt.h       # Backpropagation implementation
+│   ├── lightwatch_dataset.h    # Data loading utilities
+│   ├── lightwatch_generate.h   # Text generation utilities
+│   └── simple_cuda_test.cpp    # CUDA functionality test source
+├── build/                      # Build outputs and CMake files
+│   ├── build_cpu/              # CPU build directory
+│   ├── build_cuda/             # CUDA build directory
+│   └── ...                     # Other build configurations
+├── bin/                        # Built executables
+│   └── Release/                # Release executables
+│       ├── lightwatch_train(.exe)  # Training executable
+│       ├── lightwatch_run(.exe)    # Generation executable
+│       ├── lightwatch_gui(.exe)    # GUI executable (if Qt available)
+│       ├── data_preprocess(.exe)   # Data preprocessing utility
+│       └── simple_cuda_test(.exe)  # CUDA functionality test
 ├── lightwatch_train.cpp        # Training executable source
 ├── lightwatch_run.cpp          # Generation executable source
-├── lightwatch_gui.cpp          # GUI main application
-├── gui_mainwindow.h/.cpp       # GUI main window implementation
-├── lightwatch_kernels.h        # LSTM computation kernels
-├── lightwatch_bptt.h           # Backpropagation implementation
-├── lightwatch_dataset.h        # Data loading utilities
-├── lightwatch_generate.h       # Text generation utilities
-├── simple_cuda_test.cpp        # CUDA functionality test source
-└── CMakeLists.txt              # Build configuration
+├── CMakeLists.txt              # Build configuration
+└── README.md                   # This file
 ```
 
 ## Performance Notes
@@ -485,7 +492,7 @@ Pre-built Windows GUI executables are available in the [Releases](https://github
 
 ## Download
 
-Download the latest Windows GUI executable from the [Releases](https://github.com/watchthelight/LightwatchAI/releases/latest) page.
+Download the latest Windows executable from the [Releases](https://github.com/watchthelight/LightwatchAI/releases/latest) page.
 
 ![GUI Screenshot](screenshots/gui_main.png)
 

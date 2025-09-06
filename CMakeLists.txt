@@ -56,24 +56,24 @@ endif()
 
 # Source files
 set(LIGHTWATCH_SOURCES
-    lightwatch_types.cpp
-    lightwatch_config.cpp
-    data_preprocess_impl.cpp
+    src/lightwatch_types.cpp
+    src/lightwatch_config.cpp
+    src/data_preprocess_impl.cpp
 )
 
 set(LIGHTWATCH_HEADERS
-    lightwatch_types.h
-    lightwatch_kernels.h
-    lightwatch_bptt.h
-    lightwatch_dataset.h
-    lightwatch_generate.h
-    lightwatch_config.h
-    data_preprocess.h
+    src/lightwatch_types.h
+    src/lightwatch_kernels.h
+    src/lightwatch_bptt.h
+    src/lightwatch_dataset.h
+    src/lightwatch_generate.h
+    src/lightwatch_config.h
+    src/data_preprocess.h
 )
 
 # LightwatchAI executables
-add_executable(lightwatch_train lightwatch_train.cpp ${LIGHTWATCH_SOURCES} ${LIGHTWATCH_HEADERS})
-add_executable(lightwatch_run lightwatch_run.cpp ${LIGHTWATCH_SOURCES} ${LIGHTWATCH_HEADERS})
+add_executable(lightwatch_train src/lightwatch_train.cpp ${LIGHTWATCH_SOURCES} ${LIGHTWATCH_HEADERS})
+add_executable(lightwatch_run src/lightwatch_run.cpp ${LIGHTWATCH_SOURCES} ${LIGHTWATCH_HEADERS})
 
 # Compiler flags with platform-specific OpenMP detection
 if(MSVC)
@@ -123,7 +123,7 @@ if(USE_OPENBLAS)
 endif()
 
 # Data preprocessing executable
-add_executable(data_preprocess data_preprocess.cpp data_preprocess.h)
+add_executable(data_preprocess src/data_preprocess.cpp src/data_preprocess.h)
 
 # Apply same compiler flags as other executables
 if(MSVC)
@@ -134,7 +134,7 @@ else()
 endif()
 
 # Simple CUDA test executable
-add_executable(simple_cuda_test simple_cuda_test.cpp)
+add_executable(simple_cuda_test src/simple_cuda_test.cpp)
 
 # Apply same compiler flags as other executables
 if(MSVC)
@@ -150,7 +150,7 @@ if(USE_CUDA)
 endif()
 
 # CLI executable (generation)
-add_executable(lightwatch_cli lightwatch_run.cpp ${LIGHTWATCH_SOURCES} ${LIGHTWATCH_HEADERS})
+add_executable(lightwatch_cli src/lightwatch_run.cpp ${LIGHTWATCH_SOURCES} ${LIGHTWATCH_HEADERS})
 
 # Apply same compiler flags as other executables
 if(MSVC)
@@ -168,7 +168,7 @@ add_custom_command(TARGET lightwatch_cli POST_BUILD
 
 # GUI executable
 if(QT_FOUND)
-    add_executable(LightwatchAI lightwatch_gui.cpp gui_mainwindow.cpp gui_mainwindow.h ${LIGHTWATCH_SOURCES} ${LIGHTWATCH_HEADERS})
+    add_executable(LightwatchAI src/lightwatch_gui.cpp src/gui_mainwindow.cpp src/gui_mainwindow.h ${LIGHTWATCH_SOURCES} ${LIGHTWATCH_HEADERS})
     target_link_libraries(LightwatchAI Qt${QT_VERSION}::Widgets)
 
     # Apply same compiler flags as other executables

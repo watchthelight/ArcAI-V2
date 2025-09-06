@@ -1,0 +1,8 @@
+C:/Users/Bash/LightwatchAI/test_build/CMakeFiles/lightwatch_train.dir
+C:/Users/Bash/LightwatchAI/test_build/CMakeFiles/lightwatch_run.dir
+C:/Users/Bash/LightwatchAI/test_build/CMakeFiles/data_preprocess.dir
+C:/Users/Bash/LightwatchAI/test_build/CMakeFiles/simple_cuda_test.dir
+C:/Users/Bash/LightwatchAI/test_build/CMakeFiles/lightwatch_cli.dir
+C:/Users/Bash/LightwatchAI/test_build/CMakeFiles/INSTALL.dir
+C:/Users/Bash/LightwatchAI/test_build/CMakeFiles/ALL_BUILD.dir
+C:/Users/Bash/LightwatchAI/test_build/CMakeFiles/ZERO_CHECK.dir

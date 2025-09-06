@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\Bash\LightwatchAI\test_build\CMakeFiles\250530ba12d8928d6d94452d2151f2fe\generate.stamp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{C741D52F-8FFD-3FDC-9D38-4D6DB8C45901}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
