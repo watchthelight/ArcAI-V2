@@ -4,6 +4,10 @@ project(LightwatchAI VERSION 2.0 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# Create bin directory in project root
+set(BIN_DIR ${CMAKE_SOURCE_DIR}/bin)
+file(MAKE_DIRECTORY ${BIN_DIR})
+
 # Options
 option(USE_HIP "Enable HIP for AMD GPU support" OFF)
 option(USE_CUDA "Enable CUDA for NVIDIA GPU support" OFF)
@@ -34,6 +38,7 @@ endif()
 set(LIGHTWATCH_SOURCES
     lightwatch_types.cpp
     lightwatch_config.cpp
+    data_preprocess_impl.cpp
 )
 
 set(LIGHTWATCH_HEADERS
@@ -43,27 +48,36 @@ set(LIGHTWATCH_HEADERS
     lightwatch_dataset.h
     lightwatch_generate.h
     lightwatch_config.h
+    data_preprocess.h
 )
 
 # LightwatchAI executables
 add_executable(lightwatch_train lightwatch_train.cpp ${LIGHTWATCH_SOURCES} ${LIGHTWATCH_HEADERS})
 add_executable(lightwatch_run lightwatch_run.cpp ${LIGHTWATCH_SOURCES} ${LIGHTWATCH_HEADERS})
 
-# Compiler flags
+# Compiler flags with platform-specific OpenMP detection
 if(MSVC)
     # Remove /RTC1 option globally to avoid conflict with /O2
     string(REPLACE "/RTC1" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
     string(REPLACE "/RTC1" "" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
-    
+
     # LightwatchAI executables
-    target_compile_options(lightwatch_train PRIVATE /W4 /O2)
-    target_compile_options(lightwatch_run PRIVATE /W4 /O2)
+    target_compile_options(lightwatch_train PRIVATE /W4 /O2 /openmp)
+    target_compile_options(lightwatch_run PRIVATE /W4 /O2 /openmp)
     target_compile_options(lightwatch_train PRIVATE $<$<CONFIG:Release>:/RTC- >)
     target_compile_options(lightwatch_run PRIVATE $<$<CONFIG:Release>:/RTC- >)
 else()
+    # Check for OpenMP support
+    find_package(OpenMP QUIET)
+    if(OpenMP_CXX_FOUND)
+        set(OPENMP_FLAGS -fopenmp)
+    else()
+        set(OPENMP_FLAGS "")
+    endif()
+
     # LightwatchAI executables
-    target_compile_options(lightwatch_train PRIVATE -Wall -Wextra -O3 -fopenmp)
-    target_compile_options(lightwatch_run PRIVATE -Wall -Wextra -O3 -fopenmp)
+    target_compile_options(lightwatch_train PRIVATE -Wall -Wextra -O3 ${OPENMP_FLAGS})
+    target_compile_options(lightwatch_run PRIVATE -Wall -Wextra -O3 ${OPENMP_FLAGS})
 endif()
 
 # HIP support
@@ -90,16 +104,28 @@ if(USE_OPENBLAS)
     target_link_libraries(lightwatch_run ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES})
 endif()
 
+# Data preprocessing executable
+add_executable(data_preprocess data_preprocess.cpp data_preprocess.h)
+
+# Apply same compiler flags as other executables
+if(MSVC)
+    target_compile_options(data_preprocess PRIVATE /W4 /O2 /openmp)
+    target_compile_options(data_preprocess PRIVATE $<$<CONFIG:Release>:/RTC- >)
+    target_compile_definitions(data_preprocess PRIVATE _CRT_SECURE_NO_WARNINGS)
+else()
+    target_compile_options(data_preprocess PRIVATE -Wall -Wextra -O3 ${OPENMP_FLAGS})
+endif()
+
 # Simple CUDA test executable
 add_executable(simple_cuda_test simple_cuda_test.cpp)
 
 # Apply same compiler flags as other executables
 if(MSVC)
-    target_compile_options(simple_cuda_test PRIVATE /W4 /O2)
+    target_compile_options(simple_cuda_test PRIVATE /W4 /O2 /openmp)
     target_compile_options(simple_cuda_test PRIVATE $<$<CONFIG:Release>:/RTC- >)
     target_compile_definitions(simple_cuda_test PRIVATE _CRT_SECURE_NO_WARNINGS)
 else()
-    target_compile_options(simple_cuda_test PRIVATE -Wall -Wextra -O3)
+    target_compile_options(simple_cuda_test PRIVATE -Wall -Wextra -O3 ${OPENMP_FLAGS})
 endif()
 
 # CUDA support for simple test executable
@@ -107,7 +133,28 @@ if(USE_CUDA)
     target_compile_definitions(simple_cuda_test PRIVATE USE_CUDA)
 endif()
 
+# Post-build commands to copy executables to bin/ directory
+add_custom_command(TARGET lightwatch_train POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:lightwatch_train> ${BIN_DIR}/
+    COMMENT "Copying lightwatch_train to bin directory"
+)
+
+add_custom_command(TARGET lightwatch_run POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:lightwatch_run> ${BIN_DIR}/
+    COMMENT "Copying lightwatch_run to bin directory"
+)
+
+add_custom_command(TARGET data_preprocess POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:data_preprocess> ${BIN_DIR}/
+    COMMENT "Copying data_preprocess to bin directory"
+)
+
+add_custom_command(TARGET simple_cuda_test POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:simple_cuda_test> ${BIN_DIR}/
+    COMMENT "Copying simple_cuda_test to bin directory"
+)
+
 # Install
-install(TARGETS lightwatch_train lightwatch_run simple_cuda_test
+install(TARGETS lightwatch_train lightwatch_run data_preprocess simple_cuda_test
     RUNTIME DESTINATION bin
 )

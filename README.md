@@ -76,13 +76,13 @@ cd ..
 **Run Executables:**
 ```powershell
 # Interactive training
-.\Release\lightwatch_train.exe dataset.bin
+.\bin\lightwatch_train.exe dataset.bin
 
 # Interactive generation
-.\Release\lightwatch_run.exe checkpoint_latest.bin
+.\bin\lightwatch_run.exe checkpoint_latest.bin
 
 # With command line overrides
-.\Release\lightwatch_train.exe dataset.bin --hidden-size 256 --tbptt 64
+.\bin\lightwatch_train.exe dataset.bin --hidden-size 256 --tbptt 64
 ```
 
 ### Linux (Bash Shell)
@@ -227,6 +227,36 @@ cd ..
 
 ## Usage Guide
 
+### Preparing Training Data
+
+LightwatchAI supports custom training data with automatic preprocessing:
+
+#### Option 1: Default Data File
+1. Place your text file as `data.txt` in the project root
+2. Run training: `./bin/lightwatch_train` (Linux/macOS) or `.\bin\lightwatch_train.exe` (Windows)
+3. The system automatically preprocesses `data.txt` → `dataset.bin` + `vocab.json`
+
+#### Option 2: Custom Data File
+```bash
+# Specify custom input file
+./lightwatch_train --data my_training_data.txt
+
+# Force re-preprocessing even if files exist
+./lightwatch_train --data my_training_data.txt --regen
+```
+
+#### Manual Preprocessing
+```bash
+# Use the standalone preprocessor
+./bin/data_preprocess my_training_data.txt dataset.bin vocab.json
+```
+
+**Data Format Requirements:**
+- Plain text file (UTF-8 encoding recommended)
+- Any length (larger datasets = better models)
+- Characters are tokenized individually
+- No special preprocessing needed
+
 ### Interactive Mode
 
 When you run the executables without command line overrides, you'll see an interactive menu:
@@ -263,6 +293,9 @@ Skip the interactive menu by providing parameters directly:
 # Training with specific configuration
 ./lightwatch_train dataset.bin --hidden-size 512 --tbptt 128
 
+# Training with custom data
+./lightwatch_train --data my_data.txt --hidden-size 256 --tbptt 64
+
 # Generation with specific configuration
 ./lightwatch_run checkpoint_latest.bin --hidden-size 512 --tbptt 128 --len 2000 --temp 0.9 --seed "Once upon a time"
 ```
@@ -273,6 +306,18 @@ The system automatically detects non-interactive environments (pipes, scripts, C
 - **Hidden Size**: 128
 - **TBPTT Length**: 32
 
+### Training Options
+
+```bash
+./lightwatch_train [OPTIONS] [dataset.bin]
+
+Options:
+  --data FILE       Custom training data file (default: data.txt)
+  --regen           Force re-preprocessing of data
+  --hidden-size N   Model hidden size (default: 128)
+  --tbptt N         TBPTT length (default: 32)
+```
+
 ### Generation Options
 
 ```bash
@@ -280,7 +325,7 @@ The system automatically detects non-interactive environments (pipes, scripts, C
 
 Options:
   --hidden-size N    Model hidden size (must match training)
-  --tbptt N         TBPTT length (must match training)  
+  --tbptt N         TBPTT length (must match training)
   --len N           Generate N characters (default: 100)
   --temp T          Sampling temperature 0.1-2.0 (default: 1.0)
   --topk K          Top-K sampling, 0=disabled (default: 50)
@@ -310,7 +355,7 @@ with open(sys.argv[2], 'wb') as f:
 - **CUDA not detected**: Ensure CUDA_PATH environment variable is set
 
 ### Linux Issues
-- **"Permission denied"**: Make executables executable with `chmod +x lightwatch_*`
+- **"Permission denied"**: Make executables executable with `chmod +x bin/lightwatch_*`
 - **CUDA issues**: Check `nvidia-smi` and ensure CUDA_HOME is set
 - **Missing libraries**: Install development packages (`-dev` suffix)
 
@@ -327,15 +372,21 @@ with open(sys.argv[2], 'wb') as f:
 
 ```
 LightwatchAI/
+├── bin/                        # Built executables (after build)
+│   ├── lightwatch_train(.exe)  # Training executable
+│   ├── lightwatch_run(.exe)    # Generation executable
+│   ├── data_preprocess(.exe)   # Data preprocessing utility
+│   └── simple_cuda_test(.exe)  # CUDA functionality test
+├── data_preprocess.cpp/h       # Data preprocessing utilities
 ├── lightwatch_config.cpp/h     # Interactive configuration system
-├── lightwatch_types.cpp/h      # Runtime configurable parameters  
-├── lightwatch_train.cpp        # Training executable
-├── lightwatch_run.cpp          # Generation executable
+├── lightwatch_types.cpp/h      # Runtime configurable parameters
+├── lightwatch_train.cpp        # Training executable source
+├── lightwatch_run.cpp          # Generation executable source
 ├── lightwatch_kernels.h        # LSTM computation kernels
 ├── lightwatch_bptt.h           # Backpropagation implementation
 ├── lightwatch_dataset.h        # Data loading utilities
 ├── lightwatch_generate.h       # Text generation utilities
-├── simple_cuda_test.cpp        # CUDA functionality test
+├── simple_cuda_test.cpp        # CUDA functionality test source
 └── CMakeLists.txt              # Build configuration
 ```
 
