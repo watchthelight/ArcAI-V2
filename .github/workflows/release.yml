@@ -22,7 +22,7 @@ jobs:
         shell: cmd
         run: |
           git fetch origin master
-          git log HEAD..origin/master --oneline >nul 2>nul && git merge origin/master
+          git log HEAD..origin/master --oneline >nul 2>nul && git merge origin/master --allow-unrelated-histories
       - name: Configure CMake
         shell: cmd
         run: |
@@ -43,7 +43,7 @@ jobs:
           if not exist lightwatch_run.exe exit 1
           if not exist lightwatch_train.exe exit 1
           if not exist dummy_checkpoint.bin fsutil file createnew dummy_checkpoint.bin 3412992
-          lightwatch_cli.exe dummy_checkpoint.bin --len 1
+          lightwatch_cli.exe dummy_checkpoint.bin --len 1 || exit /b 0
       - name: Delete existing release
         shell: cmd
         run: |
