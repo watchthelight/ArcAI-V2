@@ -153,32 +153,50 @@ if(USE_CUDA)
     target_compile_definitions(simple_cuda_test PRIVATE USE_CUDA)
 endif()
 
+# CLI executable (generation)
+add_executable(lightwatch_cli lightwatch_run.cpp ${LIGHTWATCH_SOURCES} ${LIGHTWATCH_HEADERS})
+
+# Apply same compiler flags as other executables
+if(MSVC)
+    target_compile_options(lightwatch_cli PRIVATE /W4 /O2 /openmp)
+    target_compile_options(lightwatch_cli PRIVATE $<$<CONFIG:Release>:/RTC- >)
+    target_compile_definitions(lightwatch_cli PRIVATE _CRT_SECURE_NO_WARNINGS)
+else()
+    target_compile_options(lightwatch_cli PRIVATE -Wall -Wextra -O3 ${OPENMP_FLAGS})
+endif()
+
+# Post-build command
+add_custom_command(TARGET lightwatch_cli POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:lightwatch_cli> ${BIN_DIR}/
+    COMMENT "Copying lightwatch_cli to bin directory"
+)
+
 # GUI executable
 if(QT_FOUND)
-    add_executable(lightwatch_gui lightwatch_gui.cpp gui_mainwindow.cpp gui_mainwindow.h ${LIGHTWATCH_SOURCES} ${LIGHTWATCH_HEADERS})
-    target_link_libraries(lightwatch_gui Qt${QT_VERSION}::Widgets)
+    add_executable(LightwatchAI lightwatch_gui.cpp gui_mainwindow.cpp gui_mainwindow.h ${LIGHTWATCH_SOURCES} ${LIGHTWATCH_HEADERS})
+    target_link_libraries(LightwatchAI Qt${QT_VERSION}::Widgets)
 
     # Apply same compiler flags as other executables
     if(MSVC)
-        target_compile_options(lightwatch_gui PRIVATE /W4 /O2 /openmp)
-        target_compile_options(lightwatch_gui PRIVATE $<$<CONFIG:Release>:/RTC- >)
-        target_compile_definitions(lightwatch_gui PRIVATE _CRT_SECURE_NO_WARNINGS)
+        target_compile_options(LightwatchAI PRIVATE /W4 /O2 /openmp)
+        target_compile_options(LightwatchAI PRIVATE $<$<CONFIG:Release>:/RTC- >)
+        target_compile_definitions(LightwatchAI PRIVATE _CRT_SECURE_NO_WARNINGS)
     else()
-        target_compile_options(lightwatch_gui PRIVATE -Wall -Wextra -O3 ${OPENMP_FLAGS})
+        target_compile_options(LightwatchAI PRIVATE -Wall -Wextra -O3 ${OPENMP_FLAGS})
     endif()
 
     # Post-build command
-    add_custom_command(TARGET lightwatch_gui POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:lightwatch_gui> ${BIN_DIR}/
-        COMMENT "Copying lightwatch_gui to bin directory"
+    add_custom_command(TARGET LightwatchAI POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:LightwatchAI> ${BIN_DIR}/
+        COMMENT "Copying LightwatchAI to bin directory"
     )
 
     # Bundle Qt dependencies for Windows standalone executable
     if(WIN32)
         find_program(WINDEPLOYQT_EXECUTABLE windeployqt HINTS ${QT_BIN_DIR})
         if(WINDEPLOYQT_EXECUTABLE)
-            add_custom_command(TARGET lightwatch_gui POST_BUILD
-                COMMAND ${WINDEPLOYQT_EXECUTABLE} $<TARGET_FILE:lightwatch_gui>
+            add_custom_command(TARGET LightwatchAI POST_BUILD
+                COMMAND ${WINDEPLOYQT_EXECUTABLE} $<TARGET_FILE:LightwatchAI>
                 COMMENT "Bundling Qt runtime libraries"
             )
         endif()
