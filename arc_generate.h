@@ -26,16 +26,17 @@ inline uint8_t sample_row(const float* z, float temp){
     return (uint8_t)(VOCAB_SIZE-1);
 }
 
-inline void generate_text(RNN& M, uint8_t start, int n_tokens, float temp){
+inline void generate_text(LSTM& M, uint8_t start, int n_tokens, float temp){
     const int B=1, H=HIDDEN, V=VOCAB_SIZE;
-    std::vector<float> Hprev(H,0.f), Hcur(H,0.f), Z(V,0.f);
+    std::vector<float> Hprev(H,0.f), Hcur(H,0.f), Cprev(H,0.f), Ccur(H,0.f), Z(V,0.f);
     uint8_t tok = start;
     for(int t=0;t<n_tokens;t++){
-        rnn_forward(M, &tok, Hprev.data(), Hcur.data(), Z.data(), B);
+        lstm_forward(M, &tok, Hprev.data(), Cprev.data(), Hcur.data(), Ccur.data(), Z.data(), B);
         tok = sample_row(Z.data(), temp);
         std::putchar((char)tok);
         std::fflush(stdout);
         std::memcpy(Hprev.data(), Hcur.data(), (size_t)H*sizeof(float));
+        std::memcpy(Cprev.data(), Ccur.data(), (size_t)H*sizeof(float));
     }
     std::putchar('\n');
 }

@@ -39,8 +39,14 @@ add_executable(arc_run arc_run.cpp ${HEADERS})
 
 # Compiler flags
 if(MSVC)
+    # Remove /RTC1 option globally to avoid conflict with /O2
+    string(REPLACE "/RTC1" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+    string(REPLACE "/RTC1" "" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
     target_compile_options(arc_train PRIVATE /W4 /O2)
     target_compile_options(arc_run PRIVATE /W4 /O2)
+    # Disable runtime checks for optimized builds to avoid /RTC1 incompatibility
+    target_compile_options(arc_train PRIVATE $<$<CONFIG:Release>:/RTC- >)
+    target_compile_options(arc_run PRIVATE $<$<CONFIG:Release>:/RTC- >)
 else()
     target_compile_options(arc_train PRIVATE -Wall -Wextra -O3 -fopenmp)
     target_compile_options(arc_run PRIVATE -Wall -Wextra -O3 -fopenmp)

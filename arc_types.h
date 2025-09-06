@@ -55,6 +55,8 @@ inline void* arc_aligned_malloc(size_t bytes, size_t align=64) {
     void* p = nullptr;
 #if defined(_POSIX_VERSION)
     if (posix_memalign(&p, align, bytes) != 0) p = nullptr;
+#elif defined(_MSC_VER)
+    p = _aligned_malloc(bytes, align);
 #else
     p = std::aligned_alloc(align, ((bytes + align - 1)/align)*align);
 #endif
@@ -62,7 +64,13 @@ inline void* arc_aligned_malloc(size_t bytes, size_t align=64) {
     std::memset(p, 0, bytes);
     return p;
 }
-inline void arc_aligned_free(void* p){ std::free(p); }
+inline void arc_aligned_free(void* p){
+#if defined(_MSC_VER)
+    _aligned_free(p);
+#else
+    std::free(p);
+#endif
+}
 
 #endif // ARC_TYPES_H
 
